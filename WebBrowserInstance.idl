@@ -1,0 +1,43 @@
+// WebBrowserInstance.idl : WebBrowserInstance的 IDL 源
+//
+
+// 此文件将由 MIDL 工具处理以
+// 产生类型库(WebBrowserInstance.tlb)和封送处理代码。
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(4AECFFCE-0988-4A04-ACD5-EB208B7A02D6),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IBrowserApp : IDispatch{
+};
+[
+	uuid(F6C5B1BA-3A7B-4718-B300-CEFABE1120AF),
+	version(1.0),
+]
+library WebBrowserInstanceLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(6C1FA430-100C-42D4-AB4D-F0B1270FAA5F)		
+	]
+	dispinterface _IBrowserAppEvents
+	{
+		properties:
+		methods:
+	};
+	[
+		uuid(E169349B-323F-43B8-A1EE-3B58D94F2457)		
+	]
+	coclass BrowserApp
+	{
+		[default] interface IBrowserApp;
+		[default, source] dispinterface _IBrowserAppEvents;
+	};
+};
+
