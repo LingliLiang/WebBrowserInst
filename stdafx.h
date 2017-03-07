@@ -29,3 +29,5 @@
 #include <atlctl.h>
 
 #include <atlstr.h>
+
+//#define _USE_WINDOWLESS

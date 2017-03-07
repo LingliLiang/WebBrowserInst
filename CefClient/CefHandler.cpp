@@ -32,14 +32,14 @@ CefHandler::CefHandler(bool use_views)
 	g_instance = this;
 }
 
-CefHandler::CefHandler( const tstring& strUrl/*=TEXT("")*/ )
-	: m_bIsClose(false) 
+CefHandler::CefHandler(const tstring& strUrl/*=TEXT("")*/)
+	: m_bIsClose(false)
 	, m_strHomePage(strUrl)
 	, m_bUseViews(false)
 {
 }
 
-CefHandler::~CefHandler() 
+CefHandler::~CefHandler()
 {
 	g_instance = NULL;
 }
@@ -48,35 +48,36 @@ CefHandler::~CefHandler()
 /**
 * 	CefDisplayHandler methods: 状态改变回调接口
 */
-void CefHandler::OnTitleChange( CefRefPtr<CefBrowser> browser, const CefString& title )
+void CefHandler::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title)
 {
 	CEF_REQUIRE_UI_THREAD();
-	 if (m_bUseViews) {
-    // Set the title of the window using the Views framework.
-    CefRefPtr<CefBrowserView> browser_view =
-        CefBrowserView::GetForBrowser(browser);
-    if (browser_view) {
-      CefRefPtr<CefWindow> window = browser_view->GetWindow();
-      if (window)
-        window->SetTitle(title);
-    }
-  } else {
-    // Set the title of the window using platform APIs.
-    //PlatformTitleChange(browser, title);
-  }
+	if (m_bUseViews) {
+		// Set the title of the window using the Views framework.
+		CefRefPtr<CefBrowserView> browser_view =
+			CefBrowserView::GetForBrowser(browser);
+		if (browser_view) {
+			CefRefPtr<CefWindow> window = browser_view->GetWindow();
+			if (window)
+				window->SetTitle(title);
+		}
+	}
+	else {
+		// Set the title of the window using platform APIs.
+		//PlatformTitleChange(browser, title);
+	}
 }
 
-void CefHandler::OnAddressChange( CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url )
+void CefHandler::OnAddressChange(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
 
 }
 
-bool CefHandler::OnTooltip( CefRefPtr<CefBrowser> browser, CefString& text )
+bool CefHandler::OnTooltip(CefRefPtr<CefBrowser> browser, CefString& text)
 {
 	return false;
 }
 
-void CefHandler::OnStatusMessage( CefRefPtr<CefBrowser> browser, const CefString& value )
+void CefHandler::OnStatusMessage(CefRefPtr<CefBrowser> browser, const CefString& value)
 {
 
 }
@@ -109,18 +110,18 @@ bool CefHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 	return false;
 }
 
-void CefHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) 
+void CefHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 {
 	CEF_REQUIRE_UI_THREAD();
 	// Add to the list of existing browsers.
 	browser_list_.push_back(browser);
 	base::AutoLock scopLock(m_lock_);
-	if ( ! m_pBrowser.get() )
-		m_pBrowser=browser;
+	if (!m_pBrowser.get())
+		m_pBrowser = browser;
 	m_nBrowserCount++;
 }
 
-bool CefHandler::DoClose(CefRefPtr<CefBrowser> browser) 
+bool CefHandler::DoClose(CefRefPtr<CefBrowser> browser)
 {
 	CEF_REQUIRE_UI_THREAD();
 	// Closing the main window requires special handling. See the DoClose()
@@ -136,7 +137,7 @@ bool CefHandler::DoClose(CefRefPtr<CefBrowser> browser)
 	return false;
 }
 
-void CefHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) 
+void CefHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 {
 	CEF_REQUIRE_UI_THREAD();
 	// Remove from the list of existing browsers.
@@ -162,13 +163,13 @@ void CefHandler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> 
 
 }
 
-void CefHandler::OnLoadEnd( CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode )
+void CefHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
 {
 	//CefRefPtr<CefV8Context> v8 = frame->GetV8Context();
 }
 
 void CefHandler::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, \
-	ErrorCode errorCode, const CefString& errorText, const CefString& failedUrl) 
+	ErrorCode errorCode, const CefString& errorText, const CefString& failedUrl)
 {
 	CEF_REQUIRE_UI_THREAD();
 	// Don't display an error for downloaded files.
@@ -180,19 +181,19 @@ void CefHandler::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> 
 	ss << L"<html><body bgcolor=\"white\">"
 		L"<h2>Failed to load URL " << tstring(failedUrl) <<
 		L" with error " << tstring(errorText) << L" (" << errorCode <<
-		L").</h2></body></html>"<<'\0';
+		L").</h2></body></html>" << '\0';
 	frame->LoadString(ss.str(), failedUrl);
 }
 
 /**
 * CefContextMenuHandler methods: 菜单加载接口
 */
-void CefHandler::OnBeforeContextMenu( CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, \
+void CefHandler::OnBeforeContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, \
 	CefRefPtr<CefContextMenuParams> params, CefRefPtr<CefMenuModel> model)
 {
 	//在这里，我添加了自己想要的菜单
-	cef_context_menu_type_flags_t flag =   params->GetTypeFlags();
-	if ( flag & CM_TYPEFLAG_PAGE )
+	cef_context_menu_type_flags_t flag = params->GetTypeFlags();
+	if (flag & CM_TYPEFLAG_PAGE)
 	{//普通页面的右键消息
 		model->SetLabel(MENU_ID_BACK, L"后退");
 		model->SetLabel(MENU_ID_FORWARD, L"前进");
@@ -203,7 +204,7 @@ void CefHandler::OnBeforeContextMenu( CefRefPtr<CefBrowser> browser, CefRefPtr<C
 		model->SetLabel(MENU_ID_STOPLOAD, L"停止加载");
 		model->SetLabel(MENU_ID_REDO, L"重复");
 	}
-	if ( flag & CM_TYPEFLAG_EDITABLE)
+	if (flag & CM_TYPEFLAG_EDITABLE)
 	{//编辑框的右键消息
 		model->SetLabel(MENU_ID_UNDO, L"撤销");
 		model->SetLabel(MENU_ID_REDO, L"重做");
@@ -215,8 +216,8 @@ void CefHandler::OnBeforeContextMenu( CefRefPtr<CefBrowser> browser, CefRefPtr<C
 	}
 }
 
-bool CefHandler::OnContextMenuCommand( CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, \
-	CefRefPtr<CefContextMenuParams> params, int command_id, EventFlags event_flags )
+bool CefHandler::OnContextMenuCommand(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, \
+	CefRefPtr<CefContextMenuParams> params, int command_id, EventFlags event_flags)
 {
 	return false;
 }
@@ -224,33 +225,19 @@ bool CefHandler::OnContextMenuCommand( CefRefPtr<CefBrowser> browser, CefRefPtr<
 /**
 * CefDownloadHandler methods: 下载管理接口
 */
-void CefHandler::OnBeforeDownload( CefRefPtr<CefBrowser> browser, CefRefPtr<CefDownloadItem> download_item, \
-	const CefString& suggested_name, CefRefPtr<CefBeforeDownloadCallback> callback )
+void CefHandler::OnBeforeDownload(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDownloadItem> download_item, \
+	const CefString& suggested_name, CefRefPtr<CefBeforeDownloadCallback> callback)
 {
 
 }
 
-void CefHandler::OnDownloadUpdated( CefRefPtr<CefBrowser> browser, CefRefPtr<CefDownloadItem> download_item, \
-	CefRefPtr<CefDownloadItemCallback> callback )
+void CefHandler::OnDownloadUpdated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDownloadItem> download_item, \
+	CefRefPtr<CefDownloadItemCallback> callback)
 {
 	//取消CEF内部下载文件，使用默认浏览器打开链接去下载，下载过程就不需要我们关心了，毕竟不是做浏览器
 	callback->Cancel();
 	CefString strUrl = download_item->GetURL();
 	//ShellExecute(NULL, L"open", strUrl.c_str(), NULL, NULL, SW_SHOW);
-}
-
-
-bool CefHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect & rect)
-{
-	RECT rectClid = { 0,16,1280,720 };
-	::OutputDebugString(L"CefHandler::GetViewRect\n");
-	rect.Set(rectClid.left, rectClid.top, rectClid.right, rectClid.bottom);
-	return true;
-}
-
-void CefHandler::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList & dirtyRects, const void * buffer, int width, int height)
-{
-	::OutputDebugString(L"CefHandler::OnPaint\n");
 }
 
 void CefHandler::CloseAllBrowsers(bool force_close)
@@ -272,9 +259,82 @@ void CefHandler::CloseAllBrowsers(bool force_close)
 
 bool CefHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 	CefProcessId source_process,
-	CefRefPtr<CefProcessMessage> message) 
+	CefRefPtr<CefProcessMessage> message)
 {
 	return false;
+}
+
+/**
+* CefRenderHandler methods:渲染回馈
+*/
+
+bool CefHandler::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
+	CefRect& rect) {
+	return false;
+}
+
+bool CefHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) {
+	RECT rectClid = { 0,16,1280,720 };
+	::OutputDebugString(L"CefHandler::GetViewRect\n");
+	rect.Set(rectClid.left, rectClid.top, rectClid.right, rectClid.bottom);
+	return true;
+}
+
+bool CefHandler::GetScreenPoint(CefRefPtr<CefBrowser> browser,
+	int viewX,
+	int viewY,
+	int& screenX,
+	int& screenY) {
+	return false;
+}
+
+bool CefHandler::GetScreenInfo(CefRefPtr<CefBrowser> browser,
+	CefScreenInfo& screen_info) {
+	return false;
+}
+
+void CefHandler::OnPopupShow(CefRefPtr<CefBrowser> browser,
+	bool show) {}
+
+void CefHandler::OnPopupSize(CefRefPtr<CefBrowser> browser,
+	const CefRect& rect) {}
+
+void CefHandler::OnPaint(CefRefPtr<CefBrowser> browser,
+	PaintElementType type,
+	const RectList& dirtyRects,
+	const void* buffer,
+	int width, int height) {
+	::OutputDebugString(L"CefHandler::OnPaint\n");
+
+}
+
+void CefHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
+	CefCursorHandle cursor,
+	CursorType type,
+	const CefCursorInfo& custom_cursor_info) {
+}
+
+bool CefHandler::StartDragging(CefRefPtr<CefBrowser> browser,
+	CefRefPtr<CefDragData> drag_data,
+	DragOperationsMask allowed_ops,
+	int x, int y) {
+	return false;
+}
+
+
+void CefHandler::UpdateDragCursor(CefRefPtr<CefBrowser> browser,
+	DragOperation operation) {
+
+}
+
+void CefHandler::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser,
+	double x,
+	double y) {
+}
+
+void CefHandler::OnImeCompositionRangeChanged(CefRefPtr<CefBrowser> browser,
+	const CefRange& selected_range,
+	const RectList& character_bounds) {
 }
 
 /**
@@ -282,18 +342,18 @@ bool CefHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 */
 tstring CefHandler::GetLoadingUrl()
 {
-	CefRefPtr<CefFrame> pMainFram=GetMainFram();
-	return pMainFram.get()?pMainFram->GetURL():TEXT("");
+	CefRefPtr<CefFrame> pMainFram = GetMainFram();
+	return pMainFram.get() ? pMainFram->GetURL() : TEXT("");
 }
 
-void CefHandler::Navigate( const tstring& strUrl )
+void CefHandler::Navigate(const tstring& strUrl)
 {
-	CefRefPtr<CefFrame> pMainFram=GetMainFram();
-	if ( pMainFram.get() )
+	CefRefPtr<CefFrame> pMainFram = GetMainFram();
+	if (pMainFram.get())
 		pMainFram->LoadURL(strUrl.c_str());
 }
 
-void CefHandler::CreateBrowser( HWND hParentWnd, const RECT& rect )
+void CefHandler::CreateBrowser(HWND hParentWnd, const RECT& rect)
 {
 	CefWindowInfo info;
 	CefBrowserSettings settings;

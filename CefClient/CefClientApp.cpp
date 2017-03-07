@@ -108,15 +108,18 @@ void CefClientApp::OnContextInitialized()
 		CefWindowInfo window_info;
 
 #if defined(OS_WIN)
+
+#if defined(_USE_WINDOWLESS)
+		browser_settings.windowless_frame_rate = 30;
+		//::FindWindow(L"WIN32PROJECT1", L"Win32Project1")
+		window_info.SetAsWindowless(NULL,true);
+#else
 		// On Windows we need to specify certain flags that will be passed to
 		// CreateWindowEx().
 		window_info.SetAsPopup(NULL, "CefClient");
-		RECT rect = {0,16,1280,720};
-		//browser_settings.windowless_frame_rate = 30;
-		//window_info.SetAsWindowless(::FindWindow(L"WIN32PROJECT1", L"Win32Project1"),true);
-		//window_info.SetAsChild(::FindWindow(L"WIN32PROJECT1",L"Win32Project1"), rect);
 #endif
 
+#endif
 		// Create the first browser window.
 		CefBrowserHost::CreateBrowser(window_info, handler, url, browser_settings,NULL);
 	}

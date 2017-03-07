@@ -81,9 +81,10 @@ public:
 	
 		
 
+#if defined(_USE_WINDOWLESS)
 		//enabled off screen rendering
-		//settings.windowless_rendering_enabled = true;
-
+		settings.windowless_rendering_enabled = true;
+#endif
 		// CefClientApp implements application-level callbacks for the browser process.
 		// It will create the first browser instance in OnContextInitialized() after
 		// CEF has initialized.
