@@ -30,6 +30,7 @@ library WebBrowserInstanceLib
 	{
 		properties:
 		methods:
+			[id(1), helpstring("Post CEF quit message")] HRESULT Exit();
 	};
 	[
 		uuid(E169349B-323F-43B8-A1EE-3B58D94F2457)		

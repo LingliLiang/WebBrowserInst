@@ -59,6 +59,7 @@ END_CONNECTION_POINT_MAP()
 
 	void FinalRelease()
 	{
+		Fire_Exit();
 	}
 
 public:
