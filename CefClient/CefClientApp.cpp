@@ -85,8 +85,6 @@ void CefClientApp::OnContextInitialized()
 	// SimpleHandler implements browser-level callbacks.
 	CefRefPtr<CefHandler> handler(new CefHandler(use_views));
 
-	// Specify CEF browser settings here.
-	CefBrowserSettings browser_settings;
 
 	std::string url;
 
@@ -96,7 +94,10 @@ void CefClientApp::OnContextInitialized()
 	if (url.empty())
 		url = "https://www.baidu.com";
 
+	// Specify CEF browser settings here.
+	CefBrowserSettings browser_settings;
 	if (use_views) {
+
 		// Create the BrowserView.
 		CefRefPtr<CefBrowserView> browser_view = CefBrowserView::CreateBrowserView(
 			handler, url, browser_settings, NULL, NULL);

@@ -22,16 +22,6 @@ public:
 	explicit CefHandler(bool use_views);
 	CefHandler(const tstring& strUrl=TEXT(""));
 	virtual ~CefHandler();
-	//自定义方法
-	CefRefPtr<CefBrowser> GetBrowser() { return m_pBrowser; }
-	CefRefPtr<CefFrame>	GetMainFram() { return m_pBrowser.get()?m_pBrowser->GetMainFrame():NULL; }
-	HWND	GetBrowserHostWnd() { return m_pBrowser.get()?m_pBrowser->GetHost()->GetWindowHandle():NULL; }
-	void	SetHomePage(const tstring& strUrl) { m_strHomePage=strUrl; }
-	const tstring& GetHomePage()const { return m_strHomePage; }
-	tstring GetLoadingUrl();
-	void	Navigate(const tstring& strUrl);
-
-	void	CreateBrowser(HWND hParentWnd, const RECT& rect);
 
 	// Provide access to the single global instance of this object.
 	static CefHandler* GetInstance();
@@ -244,7 +234,12 @@ public:
 	virtual void OnImeCompositionRangeChanged(CefRefPtr<CefBrowser> browser,
 		const CefRange& selected_range,
 		const RectList& character_bounds);
-
+public:
+		//自定义方法
+		CefRefPtr<CefBrowser> GetBrowser() { return m_pBrowser; }
+		CefRefPtr<CefFrame>	GetMainFram() { return m_pBrowser.get() ? m_pBrowser->GetMainFrame() : NULL; }
+		HWND	GetBrowserHostWnd() { return m_pBrowser.get() ? m_pBrowser->GetHost()->GetWindowHandle() : NULL; }
+		void	CreateBrowser(IDispatch * pInterface, HWND hParentWnd, const RECT& rect);
 private:
 	typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
 	BrowserList browser_list_;
@@ -260,7 +255,38 @@ private:
 	IMPLEMENT_REFCOUNTING(CefHandler);
 
 private:
-	tstring	m_strHomePage;
+
 	static int	m_nBrowserCount;
 };
 
+class Browser
+{
+
+public:
+	Browser();
+	~Browser();
+	void	SetHomePage(const tstring& strUrl) { m_strHomePage = strUrl; }
+	const tstring& GetHomePage()const { return m_strHomePage; }
+	//tstring GetLoadingUrl();
+	//void	Navigate(const tstring& strUrl);
+	//tstring GetLoadingUrl()
+	//{
+	//	CefRefPtr<CefFrame> pMainFram = GetMainFram();
+	//	return pMainFram.get() ? pMainFram->GetURL() : TEXT("");
+	//}
+
+	//void Navigate(const tstring& strUrl)
+	//{
+	//	CefRefPtr<CefFrame> pMainFram = GetMainFram();
+	//	if (pMainFram.get())
+	//		pMainFram->LoadURL(strUrl.c_str());
+	//}
+private:
+	tstring	m_strHomePage;
+};
+
+__interface IBrowserNotify
+{
+
+	[1, helpstring("Web title change")] HRESULT OnTitleChange([in] BSTR title);
+};

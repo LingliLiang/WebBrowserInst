@@ -34,7 +34,6 @@ CefHandler::CefHandler(bool use_views)
 
 CefHandler::CefHandler(const tstring& strUrl/*=TEXT("")*/)
 	: m_bIsClose(false)
-	, m_strHomePage(strUrl)
 	, m_bUseViews(false)
 {
 }
@@ -340,26 +339,39 @@ void CefHandler::OnImeCompositionRangeChanged(CefRefPtr<CefBrowser> browser,
 /**
 * methods: 自定义接口
 */
-tstring CefHandler::GetLoadingUrl()
+void CefHandler::CreateBrowser(IDispatch * pInterface, HWND hParentWnd, const RECT& rect)
 {
-	CefRefPtr<CefFrame> pMainFram = GetMainFram();
-	return pMainFram.get() ? pMainFram->GetURL() : TEXT("");
-}
+	// Specify CEF browser settings here.
+	CefBrowserSettings browser_settings;
+	if (m_bUseViews) {
 
-void CefHandler::Navigate(const tstring& strUrl)
-{
-	CefRefPtr<CefFrame> pMainFram = GetMainFram();
-	if (pMainFram.get())
-		pMainFram->LoadURL(strUrl.c_str());
-}
+		// Create the BrowserView.
+		CefRefPtr<CefBrowserView> browser_view = CefBrowserView::CreateBrowserView(
+			this, url, browser_settings, NULL, NULL);
 
-void CefHandler::CreateBrowser(HWND hParentWnd, const RECT& rect)
-{
-	CefWindowInfo info;
-	CefBrowserSettings settings;
-	static wchar_t* pCharset = L"GB2312";
-	settings.default_encoding.str = pCharset;
-	settings.default_encoding.length = wcslen(pCharset);
-	info.SetAsChild(hParentWnd, rect);
-	CefBrowserHost::CreateBrowser(info, this, m_strHomePage.c_str(), settings, NULL);
+		// Create the Window. It will show itself after creation.
+		CefWindow::CreateTopLevelWindow(new ClientWindowDelegate(browser_view));
+	}
+	else {
+		// Information used when creating the native window.
+		CefWindowInfo window_info;
+
+#if defined(OS_WIN)
+
+#if defined(_USE_WINDOWLESS)
+		browser_settings.windowless_frame_rate = 30;
+		//::FindWindow(L"WIN32PROJECT1", L"Win32Project1")
+		window_info.SetAsWindowless(NULL, true);
+#else
+		// On Windows we need to specify certain flags that will be passed to
+		// CreateWindowEx().
+		window_info.SetAsPopup(hParentWnd, "CefClient");
+#endif
+		if (hParentWnd)
+			window_info.SetAsChild(hParentWnd, rect);
+
+#endif
+		// Create the first browser window.
+		CefBrowserHost::CreateBrowser(window_info, this, url, browser_settings, NULL);
+	}
 }
