@@ -15,6 +15,16 @@ import "ocidl.idl";
 	pointer_default(unique)
 ]
 interface IBrowserApp : IDispatch{
+	[id(1), helpstring("Quit Browser App, if there havn't other instance.")] HRESULT QuitApp();
+};
+[
+	object,
+	uuid(AAB612EC-4F70-431E-9AC0-ECDEE2B0D372),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IBrowser : IDispatch{
 };
 [
 	uuid(F6C5B1BA-3A7B-4718-B300-CEFABE1120AF),
@@ -39,6 +49,22 @@ library WebBrowserInstanceLib
 	{
 		[default] interface IBrowserApp;
 		[default, source] dispinterface _IBrowserAppEvents;
+	};
+	[
+		uuid(B8117D46-D4C3-48EF-9BA1-7B1A6EEC5AD7)		
+	]
+	dispinterface _IBrowserEvents
+	{
+		properties:
+		methods:
+	};
+	[
+		uuid(22CA57D8-2A4C-4708-ABB8-451F07BBEB8B)		
+	]
+	coclass Browser
+	{
+		[default] interface IBrowser;
+		[default, source] dispinterface _IBrowserEvents;
 	};
 };
 

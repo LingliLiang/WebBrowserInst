@@ -1,0 +1,26 @@
+HKCR
+{
+	CefBrowser.Browser.1 = s 'Browser Class'
+	{
+		CLSID = s '{22CA57D8-2A4C-4708-ABB8-451F07BBEB8B}'
+	}
+	CefBrowser.Browser = s 'Browser Class'
+	{		
+		CurVer = s 'CefBrowser.Browser.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {22CA57D8-2A4C-4708-ABB8-451F07BBEB8B} = s 'Browser Class'
+		{
+			ProgID = s 'CefBrowser.Browser.1'
+			VersionIndependentProgID = s 'CefBrowser.Browser'
+			ForceRemove Programmable
+			LocalServer32 = s '%MODULE%'
+			{
+				val ServerExecutable = s '%MODULE_RAW%'
+			}
+			TypeLib = s '{F6C5B1BA-3A7B-4718-B300-CEFABE1120AF}'
+			Version = s '1.0'
+		}
+	}
+}

@@ -30,4 +30,12 @@
 
 #include <atlstr.h>
 
-//#define _USE_WINDOWLESS
+#include <vector>
+
+#define _USE_WINDOWLESS
+
+#include "CefClient.h"
+#include "CefHandler.h"
+#include "include/base/cef_scoped_ptr.h"
+#include "include/cef_command_line.h"
+#include "CefClientApp.h"

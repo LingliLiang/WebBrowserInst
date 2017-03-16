@@ -6,12 +6,6 @@
 #include "WebBrowserInstance_i.h"
 #include "xdlldata.h"
 
-#include "CefClient.h"
-#include "CefHandler.h"
-#include "include/base/cef_scoped_ptr.h"
-#include "include/cef_command_line.h"
-#include "CefClientApp.h"
-
 using namespace ATL;
 
 
@@ -103,6 +97,13 @@ public:
 
 		// Shut down CEF.
 		CefShutdown();
+
+		MSG msg;
+		while (GetMessage(&msg, 0, 0, 0) > 0)
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 
 private:

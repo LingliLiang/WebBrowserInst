@@ -46,6 +46,9 @@
     <ClCompile Include="BrowserApp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Browser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -78,6 +81,12 @@
     <ClInclude Include="BrowserApp.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="_IBrowserEvents_CP.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Browser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WebBrowserInstance.rc">
@@ -92,6 +101,9 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="BrowserApp.rgs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="Browser.rgs">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

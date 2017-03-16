@@ -234,6 +234,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Browser.cpp" />
     <ClCompile Include="BrowserApp.cpp" />
     <ClCompile Include="CefClient\CefClient.cpp" />
     <ClCompile Include="CefClient\CefClientApp.cpp" />
@@ -275,6 +276,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Browser.h" />
     <ClInclude Include="BrowserApp.h" />
     <ClInclude Include="CefClient\CefClient.h" />
     <ClInclude Include="CefClient\CefClientApp.h" />
@@ -285,6 +287,7 @@
     <ClInclude Include="WebBrowserInstance_i.h" />
     <ClInclude Include="xdlldata.h" />
     <ClInclude Include="_IBrowserAppEvents_CP.h" />
+    <ClInclude Include="_IBrowserEvents_CP.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WebBrowserInstance.rc" />
@@ -293,6 +296,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Browser.rgs" />
     <None Include="BrowserApp.rgs" />
     <None Include="WebBrowserInstance.rgs" />
   </ItemGroup>

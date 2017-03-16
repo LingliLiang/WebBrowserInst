@@ -59,13 +59,13 @@ END_CONNECTION_POINT_MAP()
 
 	void FinalRelease()
 	{
-		Fire_Exit();
 	}
 
 public:
 
 
 
+	STDMETHOD(QuitApp)();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(BrowserApp), CBrowserApp)
