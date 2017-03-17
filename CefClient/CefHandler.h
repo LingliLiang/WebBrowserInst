@@ -239,7 +239,7 @@ public:
 		CefRefPtr<CefBrowser> GetBrowser() { return m_pBrowser; }
 		CefRefPtr<CefFrame>	GetMainFram() { return m_pBrowser.get() ? m_pBrowser->GetMainFrame() : NULL; }
 		HWND	GetBrowserHostWnd() { return m_pBrowser.get() ? m_pBrowser->GetHost()->GetWindowHandle() : NULL; }
-		void	CreateBrowser(IDispatch * pInterface, HWND hParentWnd, const RECT& rect);
+		HRESULT	CreateBrowser(struct IBrowser * pBrowser, HWND hParentWnd, const RECT& rect);
 private:
 	typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
 	BrowserList browser_list_;
@@ -265,8 +265,8 @@ class Browser
 public:
 	Browser();
 	~Browser();
-	void	SetHomePage(const tstring& strUrl) { m_strHomePage = strUrl; }
-	const tstring& GetHomePage()const { return m_strHomePage; }
+	//void	SetHomePage(const tstring& strUrl) { m_strHomePage = strUrl; }
+	//const tstring& GetHomePage()const { return m_strHomePage; }
 	//tstring GetLoadingUrl();
 	//void	Navigate(const tstring& strUrl);
 	//tstring GetLoadingUrl()
@@ -281,12 +281,5 @@ public:
 	//	if (pMainFram.get())
 	//		pMainFram->LoadURL(strUrl.c_str());
 	//}
-private:
-	tstring	m_strHomePage;
-};
 
-__interface IBrowserNotify
-{
-
-	[1, helpstring("Web title change")] HRESULT OnTitleChange([in] BSTR title);
 };

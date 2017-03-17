@@ -26,10 +26,11 @@
 #include "resource.h"
 #include <atlbase.h>
 #include <atlcom.h>
+#include <atlcomcli.h>
 #include <atlctl.h>
-
+#include <atltypes.h>
 #include <atlstr.h>
-
+using namespace ATL;
 #include <vector>
 
 #define _USE_WINDOWLESS
@@ -39,3 +40,7 @@
 #include "include/base/cef_scoped_ptr.h"
 #include "include/cef_command_line.h"
 #include "CefClientApp.h"
+
+#define WBI_PCHECK(pointer) if(!pointer) return E_POINTER
+#define WBI_REFCHECK(ref) if(!ref.get()) return E_POINTER
+#define WBI_PREFCHECK(pointerref) if(!pointerref || !((*pointerref).get())) return E_POINTER

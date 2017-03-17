@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\CefClient\;..\..\cef_binary_3.2924.1566.ga6a3da2_windows32;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\CefClient\;..\..\cef_binary_3.2924.1566.ga6a3da2_windows32;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Midl>
@@ -126,7 +126,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\CefClient\;..\..\cef_binary_3.2924.1566.ga6a3da2_windows64;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\CefClient\;..\..\cef_binary_3.2924.1566.ga6a3da2_windows64;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Midl>
@@ -163,7 +163,7 @@
       <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\CefClient\;..\..\cef_binary_3.2924.1566.ga6a3da2_windows32;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\CefClient\;..\..\cef_binary_3.2924.1566.ga6a3da2_windows32;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Midl>
@@ -202,7 +202,7 @@
       <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\CefClient\;..\..\cef_binary_3.2924.1566.ga6a3da2_windows64;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\CefClient\;..\..\cef_binary_3.2924.1566.ga6a3da2_windows64;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Midl>

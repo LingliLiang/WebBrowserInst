@@ -7,12 +7,20 @@
 import "oaidl.idl";
 import "ocidl.idl";
 
+typedef enum 
+{
+	WindowLess = 0,
+	AsChild = 1,
+	AsPopup = 2
+}BrowserRenderMode;
+
 [
 	object,
 	uuid(4AECFFCE-0988-4A04-ACD5-EB208B7A02D6),
 	dual,
 	nonextensible,
-	pointer_default(unique)
+	pointer_default(unique),
+	oleautomation
 ]
 interface IBrowserApp : IDispatch{
 	[id(1), helpstring("Quit Browser App, if there havn't other instance.")] HRESULT QuitApp();
@@ -22,9 +30,28 @@ interface IBrowserApp : IDispatch{
 	uuid(AAB612EC-4F70-431E-9AC0-ECDEE2B0D372),
 	dual,
 	nonextensible,
-	pointer_default(unique)
+	pointer_default(unique),
+	oleautomation
 ]
 interface IBrowser : IDispatch{
+	[propget, id(1)] HRESULT HomePage([out, retval] BSTR* pVal);
+	[propput, id(1)] HRESULT HomePage([in] BSTR newVal);
+	[propget, id(2)] HRESULT RenderMode([out, retval] BrowserRenderMode* pVal);
+	[propput, id(2)] HRESULT RenderMode([in] BrowserRenderMode newVal);
+	[propget, id(3)] HRESULT FrameRate([out, retval] LONG* pVal);
+	[propput, id(3)] HRESULT FrameRate([in] LONG newVal);
+	[propget, id(4), helpstring("Windowless View Rect")] HRESULT ViewRect([out, retval] RECT* pVal);
+	[propput, id(4), helpstring("Windowless View Rect")] HRESULT ViewRect([in] RECT newVal);
+	[propget, id(5), helpstring("Loading")] HRESULT Busy([out, retval] VARIANT_BOOL* pVal);
+	[propget, id(6), helpstring("Current Web URL")] HRESULT LocationURL([out, retval] BSTR* pVal);
+	[propget, id(7)] HRESULT IsInvalid([out, retval] VARIANT_BOOL* pVal);
+	[id(0x0040), helpstring("Go to home page")] HRESULT GoHomePage();
+	[id(0x0041), helpstring("Browse page forward")] HRESULT GoForward();
+	[id(0x0042), helpstring("Browse page back")] HRESULT GoBack();
+	[id(0x0043), helpstring("Navigate to url")] HRESULT Navigate([in] BSTR url);
+	[id(0x0044), helpstring("Reload current page")] HRESULT Reload();
+	[id(0x0045), helpstring("Stop loading when it's not finish")] HRESULT StopLoading();
+	[id(0x0046), helpstring("close browser")] HRESULT Close();
 };
 [
 	uuid(F6C5B1BA-3A7B-4718-B300-CEFABE1120AF),
@@ -59,12 +86,20 @@ library WebBrowserInstanceLib
 		methods:
 	};
 	[
+		uuid("7F62EFA2-F6D3-41BD-9C7C-2071CE58B2FB")
+	]
+	interface IBrowserNotify
+	{
+		[id(1), helpstring("Web title change")] HRESULT OnTitleChange([in] BSTR title);
+	};
+	[
 		uuid(22CA57D8-2A4C-4708-ABB8-451F07BBEB8B)		
 	]
 	coclass Browser
 	{
 		[default] interface IBrowser;
 		[default, source] dispinterface _IBrowserEvents;
+		interface IBrowserNotify;
 	};
 };
 

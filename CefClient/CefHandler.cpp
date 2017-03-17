@@ -10,6 +10,8 @@
 #include "include/wrapper/cef_closure_task.h"
 #include "include/wrapper/cef_helpers.h"
 
+//interface predefines
+#include "WebBrowserInstance_i.h"
 
 namespace {
 
@@ -339,39 +341,54 @@ void CefHandler::OnImeCompositionRangeChanged(CefRefPtr<CefBrowser> browser,
 /**
 * methods: 自定义接口
 */
-void CefHandler::CreateBrowser(IDispatch * pInterface, HWND hParentWnd, const RECT& rect)
+HRESULT CefHandler::CreateBrowser(IBrowser * pBrowser, HWND hParentWnd, const RECT& rect)
 {
 	// Specify CEF browser settings here.
 	CefBrowserSettings browser_settings;
-	if (m_bUseViews) {
 
-		// Create the BrowserView.
-		CefRefPtr<CefBrowserView> browser_view = CefBrowserView::CreateBrowserView(
-			this, url, browser_settings, NULL, NULL);
-
-		// Create the Window. It will show itself after creation.
-		CefWindow::CreateTopLevelWindow(new ClientWindowDelegate(browser_view));
-	}
-	else {
-		// Information used when creating the native window.
-		CefWindowInfo window_info;
+	// Information used when creating the native window.
+	CefWindowInfo window_info;
 
 #if defined(OS_WIN)
+	CComBSTR url;
+	tstring strHomePage;
+	pBrowser->get_HomePage(&url);
+
+#ifdef UNICODE
+	strHomePage = (LPCTSTR)url;
+#else
+	strHomePage = T2A((LPCWSTR)url);
+#endif // UNICODE
 
 #if defined(_USE_WINDOWLESS)
-		browser_settings.windowless_frame_rate = 30;
-		//::FindWindow(L"WIN32PROJECT1", L"Win32Project1")
-		window_info.SetAsWindowless(NULL, true);
-#else
+	long frame_rate = 0;
+	pBrowser->get_FrameRate(&frame_rate);
+	browser_settings.windowless_frame_rate = frame_rate;
+#endif //_USE_WINDOWLESS
+	BrowserRenderMode render_mode;
+	pBrowser->get_RenderMode(&render_mode);
+	switch (render_mode)
+	{
+	case WindowLess:
+		window_info.SetAsWindowless(hParentWnd, true);
+		break;
+	case AsChild:
+		if (hParentWnd)
+			window_info.SetAsChild(hParentWnd, rect);
+		else
+			return E_INVALIDARG;
+		break;
+	case AsPopup:
+	default:
 		// On Windows we need to specify certain flags that will be passed to
 		// CreateWindowEx().
 		window_info.SetAsPopup(hParentWnd, "CefClient");
-#endif
-		if (hParentWnd)
-			window_info.SetAsChild(hParentWnd, rect);
-
-#endif
-		// Create the first browser window.
-		CefBrowserHost::CreateBrowser(window_info, this, url, browser_settings, NULL);
+		break;
 	}
+	
+	
+#endif //OS_WIN
+	// Create the browser window.
+	CefBrowserHost::CreateBrowser(window_info, this, strHomePage, browser_settings, NULL);
+	return S_OK;
 }
