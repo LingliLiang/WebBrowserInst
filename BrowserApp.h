@@ -7,7 +7,7 @@
 
 #include "WebBrowserInstance_i.h"
 #include "_IBrowserAppEvents_CP.h"
-
+#include "Browser.h"
 
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -23,7 +23,7 @@ using namespace ATL;
 *
 *
 */
-
+typedef CComObject<CBrowser> CBrowserObj;
 class ATL_NO_VTABLE CBrowserApp :
 	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CBrowserApp, &CLSID_BrowserApp>,
@@ -32,9 +32,7 @@ class ATL_NO_VTABLE CBrowserApp :
 	public IDispatchImpl<IBrowserApp, &IID_IBrowserApp, &LIBID_WebBrowserInstanceLib, /*wMajor =*/ 1, /*wMinor =*/ 0>
 {
 public:
-	CBrowserApp()
-	{
-	}
+	CBrowserApp();
 
 DECLARE_REGISTRY_RESOURCEID(IDR_BROWSERAPP)
 
@@ -52,20 +50,23 @@ END_CONNECTION_POINT_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
-	HRESULT FinalConstruct()
-	{
-		return S_OK;
-	}
+	HRESULT FinalConstruct();
+	void FinalRelease();
 
-	void FinalRelease()
-	{
-	}
-
+private:
+	std::vector<CBrowserObj> m_vecBrowsers;
 public:
 
-
-
 	STDMETHOD(QuitApp)();
+	STDMETHOD(CloseAll)();
+	STDMETHOD(Add)(CBrowser* pBrowser);
+	STDMETHOD(Close)(ULONG ulIndex);
+	STDMETHOD(CloseIdentify)(LONG lId);
+	STDMETHOD(get_Count)(LONG* pVal);
+	STDMETHOD(get_Browser)(IBrowser** pVal);
+	STDMETHOD(get_Item)(LONG index, IBrowser** pVal);
+	STDMETHOD(get_NewEnum)(IUnknown** pVal);
+	STDMETHOD(CreateBrowser)();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(BrowserApp), CBrowserApp)

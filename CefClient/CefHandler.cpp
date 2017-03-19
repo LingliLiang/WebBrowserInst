@@ -19,7 +19,6 @@ namespace {
 
 }  // namespace
 
-int		CefHandler::m_nBrowserCount = 0;
 
 CefHandler* CefHandler::GetInstance()
 {
@@ -32,6 +31,7 @@ CefHandler::CefHandler(bool use_views)
 {
 	DCHECK(!g_instance);
 	g_instance = this;
+	ibrowser_map_[IBROWSERCREATE] = CComPtr<IBrowser>();
 }
 
 CefHandler::CefHandler(const tstring& strUrl/*=TEXT("")*/)
@@ -116,10 +116,12 @@ void CefHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 	CEF_REQUIRE_UI_THREAD();
 	// Add to the list of existing browsers.
 	browser_list_.push_back(browser);
+	CefRefPtr<CefBrowser> * p = &(*browser_list_.rbegin());
 	base::AutoLock scopLock(m_lock_);
-	if (!m_pBrowser.get())
-		m_pBrowser = browser;
-	m_nBrowserCount++;
+	ibrowser_map_[browser->GetIdentifier()].Attach(ibrowser_map_[IBROWSERCREATE].Detach());
+	assert(ibrowser_map_[browser->GetIdentifier()].p);
+	ibrowser_map_[browser->GetIdentifier()]->put_Identifier(browser->GetIdentifier());
+	ibrowser_map_[browser->GetIdentifier()]->put_BrowserRefPoint(reinterpret_cast<IUnknown**>(&p));
 }
 
 bool CefHandler::DoClose(CefRefPtr<CefBrowser> browser)
@@ -145,13 +147,18 @@ void CefHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 	BrowserList::iterator bit = browser_list_.begin();
 	for (; bit != browser_list_.end(); ++bit) {
 		if ((*bit)->IsSame(browser)) {
+			IBrowserMapIt ibit = ibrowser_map_.find(browser->GetIdentifier());
+			if (ibit != ibrowser_map_.end())
+			{
+				ibit->second->RemoveBrowserRef();
+				ibrowser_map_.erase(ibit);
+			}
 			browser_list_.erase(bit);
 			break;
 		}
 	}
 	if (browser_list_.empty()) {
 		// All browser windows have closed. Quit the application message loop.
-		m_pBrowser = NULL;
 		CefQuitMessageLoop();
 	}
 }
@@ -389,6 +396,8 @@ HRESULT CefHandler::CreateBrowser(IBrowser * pBrowser, HWND hParentWnd, const RE
 	
 #endif //OS_WIN
 	// Create the browser window.
+	base::AutoLock scopLock(m_lock_);
+	ibrowser_map_[IBROWSERCREATE] = pBrowser;
 	CefBrowserHost::CreateBrowser(window_info, this, strHomePage, browser_settings, NULL);
 	return S_OK;
 }

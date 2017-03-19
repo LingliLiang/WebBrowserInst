@@ -18,6 +18,10 @@ class CefHandler
 	public CefDownloadHandler,
 	public CefRenderHandler
 {
+	enum 
+	{
+		IBROWSERCREATE = 0xffffffff
+	};
 public:
 	explicit CefHandler(bool use_views);
 	CefHandler(const tstring& strUrl=TEXT(""));
@@ -236,14 +240,14 @@ public:
 		const RectList& character_bounds);
 public:
 		//自定义方法
-		CefRefPtr<CefBrowser> GetBrowser() { return m_pBrowser; }
-		CefRefPtr<CefFrame>	GetMainFram() { return m_pBrowser.get() ? m_pBrowser->GetMainFrame() : NULL; }
-		HWND	GetBrowserHostWnd() { return m_pBrowser.get() ? m_pBrowser->GetHost()->GetWindowHandle() : NULL; }
 		HRESULT	CreateBrowser(struct IBrowser * pBrowser, HWND hParentWnd, const RECT& rect);
 private:
 	typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
 	BrowserList browser_list_;
-	CefRefPtr<CefBrowser>	m_pBrowser;
+	typedef std::map<int ,CComPtr<IBrowser> > IBrowserMap;
+	typedef std::map<int, CComPtr<IBrowser> >::iterator IBrowserMapIt;
+	IBrowserMap ibrowser_map_;
+
 	bool	m_bIsClose;
 
 	// True if the application is using the Views framework.
@@ -255,31 +259,5 @@ private:
 	IMPLEMENT_REFCOUNTING(CefHandler);
 
 private:
-
-	static int	m_nBrowserCount;
-};
-
-class Browser
-{
-
-public:
-	Browser();
-	~Browser();
-	//void	SetHomePage(const tstring& strUrl) { m_strHomePage = strUrl; }
-	//const tstring& GetHomePage()const { return m_strHomePage; }
-	//tstring GetLoadingUrl();
-	//void	Navigate(const tstring& strUrl);
-	//tstring GetLoadingUrl()
-	//{
-	//	CefRefPtr<CefFrame> pMainFram = GetMainFram();
-	//	return pMainFram.get() ? pMainFram->GetURL() : TEXT("");
-	//}
-
-	//void Navigate(const tstring& strUrl)
-	//{
-	//	CefRefPtr<CefFrame> pMainFram = GetMainFram();
-	//	if (pMainFram.get())
-	//		pMainFram->LoadURL(strUrl.c_str());
-	//}
 
 };

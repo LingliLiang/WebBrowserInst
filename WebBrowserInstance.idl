@@ -14,6 +14,8 @@ typedef enum
 	AsPopup = 2
 }BrowserRenderMode;
 
+interface IBrowser;
+
 [
 	object,
 	uuid(4AECFFCE-0988-4A04-ACD5-EB208B7A02D6),
@@ -24,6 +26,14 @@ typedef enum
 ]
 interface IBrowserApp : IDispatch{
 	[id(1), helpstring("Quit Browser App, if there havn't other instance.")] HRESULT QuitApp();
+	[id(2), helpstring("Close all browser,don't use this if there other inst")] HRESULT CloseAll();
+	[id(3), helpstring("Close index browser")] HRESULT Close([in] ULONG ulIndex);
+	[id(4), helpstring("close identify's browser")] HRESULT CloseIdentify([in] LONG lId);
+	[propget, id(5)] HRESULT Count([out, retval] LONG* pVal);
+	[propget, id(DISPID_VALUE)] HRESULT Item([in] LONG index, [out, retval] IBrowser** pVal);
+	[propget, id(DISPID_NEWENUM)] HRESULT NewEnum([out, retval] IUnknown** pVal);
+	[id(6)] HRESULT CreateBrowser();
+	[propget, id(7)] HRESULT Browser([out, retval] IBrowser** pVal);
 };
 [
 	object,
@@ -45,6 +55,10 @@ interface IBrowser : IDispatch{
 	[propget, id(5), helpstring("Loading")] HRESULT Busy([out, retval] VARIANT_BOOL* pVal);
 	[propget, id(6), helpstring("Current Web URL")] HRESULT LocationURL([out, retval] BSTR* pVal);
 	[propget, id(7)] HRESULT IsInvalid([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(8), local] HRESULT BrowserRefPoint([in] IUnknown** newVal);
+	[propget, id(9)] HRESULT Identifier([out, retval] LONG* pVal);
+	[propput, id(9), local] HRESULT Identifier([in] LONG newVal);
+
 	[id(0x0040), helpstring("Go to home page")] HRESULT GoHomePage();
 	[id(0x0041), helpstring("Browse page forward")] HRESULT GoForward();
 	[id(0x0042), helpstring("Browse page back")] HRESULT GoBack();
@@ -52,6 +66,9 @@ interface IBrowser : IDispatch{
 	[id(0x0044), helpstring("Reload current page")] HRESULT Reload();
 	[id(0x0045), helpstring("Stop loading when it's not finish")] HRESULT StopLoading();
 	[id(0x0046), helpstring("close browser")] HRESULT Close();
+	[id(0x0047), local] HRESULT RemoveBrowserRef();
+
+	[id(0x0048), helpstring("handle off screen message proc")] HRESULT MessageProc([in] LONGLONG hWnd, [in] ULONG msg, [in] ULONGLONG wParam, [in] LONGLONG lParam);
 };
 [
 	uuid(F6C5B1BA-3A7B-4718-B300-CEFABE1120AF),
@@ -86,7 +103,8 @@ library WebBrowserInstanceLib
 		methods:
 	};
 	[
-		uuid("7F62EFA2-F6D3-41BD-9C7C-2071CE58B2FB")
+		uuid("7F62EFA2-F6D3-41BD-9C7C-2071CE58B2FB"),
+		local
 	]
 	interface IBrowserNotify
 	{

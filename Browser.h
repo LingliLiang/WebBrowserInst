@@ -60,23 +60,25 @@ public:
 	}
 
 public:
-
+	void put_BrowserRefPoint(CefRefPtr<CefBrowser>** p);
 
 private:
 	CString  m_strHomePage;
 	BrowserRenderMode m_mode;
-	long m_frameRate; 
+	long m_frameRate;
+	long m_identifier;
 	CRect m_viewRect;
 	CefRefPtr<CefBrowser>*  m_BrowserRef;
 
-	// IBrowser Methods
+
 public:
+	// IBrowserNotify Methods
+	STDMETHOD(OnTitleChange)(BSTR title);
+	
+public:
+	// IBrowser Methods
 	STDMETHOD(get_HomePage)(BSTR* pVal);
 	STDMETHOD(put_HomePage)(BSTR newVal);
-	// IBrowserNotify Methods
-public:
-	STDMETHOD(OnTitleChange)(BSTR title);
-
 	STDMETHOD(get_RenderMode)(BrowserRenderMode* pVal);
 	STDMETHOD(put_RenderMode)(BrowserRenderMode newVal);
 	STDMETHOD(get_FrameRate)(LONG* pVal);
@@ -86,6 +88,10 @@ public:
 	STDMETHOD(get_Busy)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_LocationURL)(BSTR* pVal);
 	STDMETHOD(get_IsInvalid)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_BrowserRefPoint)(IUnknown** newVal);
+	STDMETHOD(get_Identifier)(LONG* pVal);
+	STDMETHOD(put_Identifier)(LONG newVal);
+
 	STDMETHOD(GoHomePage)();
 	STDMETHOD(GoForward)();
 	STDMETHOD(GoBack)();
@@ -93,6 +99,10 @@ public:
 	STDMETHOD(Reload)();
 	STDMETHOD(StopLoading)();
 	STDMETHOD(Close)();
+	STDMETHOD(RemoveBrowserRef)();
+	
+	STDMETHOD(MessageProc)(LONGLONG hWnd, ULONG msg, ULONGLONG wParam, LONGLONG lParam);
 };
 
-OBJECT_ENTRY_AUTO(__uuidof(Browser), CBrowser)
+//OBJECT_ENTRY_AUTO(__uuidof(Browser), CBrowser)
+OBJECT_ENTRY_NON_CREATEABLE_EX_AUTO(__uuidof(Browser), CBrowser)

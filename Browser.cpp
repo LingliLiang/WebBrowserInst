@@ -5,6 +5,13 @@
 
 
 // CBrowser
+void CBrowser::put_BrowserRefPoint(CefRefPtr<CefBrowser>** p)
+{
+	if (p && (*p)) {
+		m_BrowserRef = *p;
+	}
+}
+
 
 STDMETHODIMP CBrowser::get_HomePage(BSTR* pVal)
 {
@@ -16,7 +23,6 @@ STDMETHODIMP CBrowser::get_HomePage(BSTR* pVal)
 
 STDMETHODIMP CBrowser::put_HomePage(BSTR newVal)
 {
-	// TODO: 在此添加实现代码
 	if (newVal) return E_INVALIDARG;
 	m_strHomePage = newVal;
 	return S_OK;
@@ -65,7 +71,6 @@ STDMETHODIMP CBrowser::put_FrameRate(LONG newVal)
 
 STDMETHODIMP CBrowser::get_ViewRect(RECT* pVal)
 {
-	// TODO: 在此添加实现代码
 	*pVal = m_viewRect;
 	return S_OK;
 }
@@ -73,7 +78,6 @@ STDMETHODIMP CBrowser::get_ViewRect(RECT* pVal)
 
 STDMETHODIMP CBrowser::put_ViewRect(RECT newVal)
 {
-	// TODO: 在此添加实现代码
 	CRect viewRect = newVal;
 	if(viewRect.IsRectNull()) return E_INVALIDARG;
 	m_viewRect = viewRect;
@@ -105,6 +109,30 @@ STDMETHODIMP CBrowser::get_IsInvalid(VARIANT_BOOL* pVal)
 		*pVal = VARIANT_FALSE;
 	else
 		*pVal = VARIANT_TRUE;
+	return S_OK;
+}
+
+
+STDMETHODIMP CBrowser::put_BrowserRefPoint(IUnknown** newVal)
+{
+	// TODO: Add your implementation code here
+	put_BrowserRefPoint(reinterpret_cast<CefRefPtr<CefBrowser>**>(newVal));
+	return S_OK;
+}
+
+
+STDMETHODIMP CBrowser::get_Identifier(LONG* pVal)
+{
+	// TODO: Add your implementation code here
+	*pVal = m_identifier;
+	return S_OK;
+}
+
+
+STDMETHODIMP CBrowser::put_Identifier(LONG newVal)
+{
+	// TODO: Add your implementation code here
+	m_identifier = newVal;
 	return S_OK;
 }
 
@@ -171,5 +199,21 @@ STDMETHODIMP CBrowser::Close()
 	CefRefPtr<CefBrowserHost> pHost = (*m_BrowserRef)->GetHost();
 	WBI_REFCHECK(pHost);
 	pHost->CloseBrowser(false);
+	return S_OK;
+}
+
+
+STDMETHODIMP CBrowser::RemoveBrowserRef()
+{
+	// TODO: Add your implementation code here
+	m_BrowserRef = NULL;
+	return S_OK;
+}
+
+
+STDMETHODIMP CBrowser::MessageProc(LONGLONG hWnd, ULONG msg, ULONGLONG wParam, LONGLONG lParam)
+{
+	// TODO: Add your implementation code here
+
 	return S_OK;
 }
