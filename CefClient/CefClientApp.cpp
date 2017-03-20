@@ -8,7 +8,6 @@
 #include "include/views/cef_window.h"
 #include "include/wrapper/cef_helpers.h"
 
-
 namespace {
 
 	// When using the Views framework this object provides the delegate
@@ -83,7 +82,7 @@ void CefClientApp::OnContextInitialized()
 #endif
 
 	// SimpleHandler implements browser-level callbacks.
-	CefRefPtr<CefHandler> handler(new CefHandler(use_views));
+	//CefRefPtr<CefHandler> handler(new CefHandler(use_views));
 
 
 	std::string url;
@@ -94,34 +93,34 @@ void CefClientApp::OnContextInitialized()
 	if (url.empty())
 		url = "https://www.baidu.com";
 
-	// Specify CEF browser settings here.
-	CefBrowserSettings browser_settings;
-	if (use_views) {
-
-		// Create the BrowserView.
-		CefRefPtr<CefBrowserView> browser_view = CefBrowserView::CreateBrowserView(
-			handler, url, browser_settings, NULL, NULL);
-
-		// Create the Window. It will show itself after creation.
-		CefWindow::CreateTopLevelWindow(new ClientWindowDelegate(browser_view));
-	} else {
-		// Information used when creating the native window.
-		CefWindowInfo window_info;
-
-#if defined(OS_WIN)
-
-#if defined(_USE_WINDOWLESS)
-		browser_settings.windowless_frame_rate = 30;
-		//::FindWindow(L"WIN32PROJECT1", L"Win32Project1")
-		window_info.SetAsWindowless(NULL,true);
-#else
-		// On Windows we need to specify certain flags that will be passed to
-		// CreateWindowEx().
-		window_info.SetAsPopup(NULL, "CefClient");
-#endif
-
-#endif
-		// Create the first browser window.
-		CefBrowserHost::CreateBrowser(window_info, handler, url, browser_settings,NULL);
-	}
+//	// Specify CEF browser settings here.
+//	CefBrowserSettings browser_settings;
+//	if (use_views) {
+//
+//		// Create the BrowserView.
+//		CefRefPtr<CefBrowserView> browser_view = CefBrowserView::CreateBrowserView(
+//			handler, url, browser_settings, NULL, NULL);
+//
+//		// Create the Window. It will show itself after creation.
+//		CefWindow::CreateTopLevelWindow(new ClientWindowDelegate(browser_view));
+//	} else {
+//		// Information used when creating the native window.
+//		CefWindowInfo window_info;
+//
+//#if defined(OS_WIN)
+//
+//#if !defined(_USE_WINDOWLESS)
+//		browser_settings.windowless_frame_rate = 30;
+//		//::FindWindow(L"WIN32PROJECT1", L"Win32Project1")
+//		window_info.SetAsWindowless(NULL,true);
+//#else
+//		// On Windows we need to specify certain flags that will be passed to
+//		// CreateWindowEx().
+//		window_info.SetAsPopup(NULL, "CefClient");
+//#endif
+//
+//#endif
+//		// Create the first browser window.
+//		CefBrowserHost::CreateBrowser(window_info, handler, url, browser_settings,NULL);
+	//}
 }

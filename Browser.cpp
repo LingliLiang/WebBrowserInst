@@ -5,6 +5,28 @@
 
 
 // CBrowser
+
+CBrowser::CBrowser()
+{
+	m_BrowserRef = NULL;
+	m_mode = AsPopup;
+	m_frameRate = 30;
+	m_identifier = 0;
+}
+
+
+HRESULT CBrowser::FinalConstruct()
+{
+	
+	return S_OK;
+}
+
+
+void CBrowser::FinalRelease()
+{
+}
+
+
 void CBrowser::put_BrowserRefPoint(CefRefPtr<CefBrowser>** p)
 {
 	if (p && (*p)) {
@@ -15,7 +37,7 @@ void CBrowser::put_BrowserRefPoint(CefRefPtr<CefBrowser>** p)
 
 STDMETHODIMP CBrowser::get_HomePage(BSTR* pVal)
 {
-	if(pVal) return E_INVALIDARG;
+	if(*pVal) return E_INVALIDARG;
 	*pVal = m_strHomePage.AllocSysString();
 	return S_OK;
 }
@@ -23,7 +45,7 @@ STDMETHODIMP CBrowser::get_HomePage(BSTR* pVal)
 
 STDMETHODIMP CBrowser::put_HomePage(BSTR newVal)
 {
-	if (newVal) return E_INVALIDARG;
+	if (!newVal) return E_INVALIDARG;
 	m_strHomePage = newVal;
 	return S_OK;
 }

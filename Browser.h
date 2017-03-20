@@ -28,10 +28,7 @@ class ATL_NO_VTABLE CBrowser :
 	public IDispatchImpl<IBrowserNotify, &__uuidof(IBrowserNotify), &LIBID_WebBrowserInstanceLib, /* wMajor = */ 1, /* wMinor = */ 0>
 {
 public:
-	CBrowser()
-	{
-		m_BrowserRef = NULL;
-	}
+	CBrowser();
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_BROWSER)
 
@@ -50,14 +47,8 @@ public:
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
-	HRESULT FinalConstruct()
-	{
-		return S_OK;
-	}
-
-	void FinalRelease()
-	{
-	}
+	HRESULT FinalConstruct();
+	void FinalRelease();
 
 public:
 	void put_BrowserRefPoint(CefRefPtr<CefBrowser>** p);

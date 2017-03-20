@@ -110,9 +110,43 @@ STDMETHODIMP CBrowserApp::get_NewEnum(IUnknown** pVal)
 }
 
 
-STDMETHODIMP CBrowserApp::CreateBrowser()
+STDMETHODIMP CBrowserApp::CreateBrowser(IBrowser** pVal)
 {
 	// TODO: Add your implementation code here
+	CComObject<CBrowser>* p = NULL;
+	if(FAILED(p->CreateInstance(&p)))
+	{
+		return E_UNEXPECTED;
+	}
+	IBrowser* pIBrowser = NULL;
+	if(FAILED(p->QueryInterface(IID_IBrowser,(void**)&pIBrowser)))
+	{
+		return E_UNEXPECTED;
+	}
+	CComBSTR str;
+	str = _T("http://www.nagasoft.cn/");
+	pIBrowser->put_HomePage(str);
+	m_vecBrowsers.push_back(*p);
+	*pVal = pIBrowser;
+	return S_OK;
+}
 
+
+STDMETHODIMP CBrowserApp::ShowBrowser(IBrowser* pVal)
+{
+	if(!pVal) return E_INVALIDARG;
+	CefHandler* pInst = CefHandler::GetInstance();
+	RECT rc={0};
+	if(pInst)
+	{
+		SUCCEEDED(pInst->CreateBrowser(pVal,NULL,rc));
+	}
+	else
+	{
+		// SimpleHandler implements browser-level callbacks.
+		CefRefPtr<CefHandler> handler(new CefHandler(false));
+		pInst = CefHandler::GetInstance();
+		SUCCEEDED(pInst->CreateBrowser(pVal,NULL,rc));
+	}
 	return S_OK;
 }

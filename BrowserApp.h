@@ -66,7 +66,8 @@ public:
 	STDMETHOD(get_Browser)(IBrowser** pVal);
 	STDMETHOD(get_Item)(LONG index, IBrowser** pVal);
 	STDMETHOD(get_NewEnum)(IUnknown** pVal);
-	STDMETHOD(CreateBrowser)();
+	STDMETHOD(CreateBrowser)(IBrowser** pVal);
+	STDMETHOD(ShowBrowser)(IBrowser* pVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(BrowserApp), CBrowserApp)

@@ -98,12 +98,12 @@ public:
 		// Shut down CEF.
 		CefShutdown();
 
-		MSG msg;
-		while (GetMessage(&msg, 0, 0, 0) > 0)
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
+		//MSG msg;
+		//while (GetMessage(&msg, 0, 0, 0) > 0)
+		//{
+		//	TranslateMessage(&msg);
+		//	DispatchMessage(&msg);
+		//}
 	}
 
 private:
