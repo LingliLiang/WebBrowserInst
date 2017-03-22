@@ -98,14 +98,48 @@ public:
 		// Shut down CEF.
 		CefShutdown();
 
-		//MSG msg;
-		//while (GetMessage(&msg, 0, 0, 0) > 0)
-		//{
-		//	TranslateMessage(&msg);
-		//	DispatchMessage(&msg);
-		//}
+		MSG msg;
+		while (GetMessage(&msg, 0, 0, 0) > 0)
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 
+	LONG Unlock() throw()
+	{
+		LONG lRet = CoReleaseServerProcess();
+
+#ifndef _ATL_NO_COM_SUPPORT
+
+		if (lRet == 0)
+		{
+			if (m_bDelayShutdown)
+			{
+				m_bActivity = true;
+				::SetEvent(m_hEventShutdown); // tell monitor that we transitioned to zero
+			}
+			else
+			{
+				//::PostThreadMessage(m_dwMainThreadID, WM_QUIT, 0, 0);
+				CefQuitMessageLoop(); // replace qiut message
+			}
+		}
+
+#endif	// _ATL_NO_COM_SUPPORT
+
+		return lRet;
+	}
+
+#ifndef _ATL_NO_COM_SUPPORT
+	void MonitorShutdown() throw()
+	{
+		::WaitForSingleObject(m_hEventShutdown, INFINITE);
+		::CloseHandle(m_hEventShutdown);
+		//::PostThreadMessage(m_dwMainThreadID, WM_QUIT, 0, 0);
+		CefQuitMessageLoop(); // replace qiut message
+	}
+#endif //_ATL_NO_COM_SUPPORT
 private:
 	CString m_ModulePath;
 };
@@ -116,9 +150,27 @@ CWebBrowserInstanceModule _AtlModule;
 extern "C" int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 
 								LPTSTR lpCmdLine, int nShowCmd)
 {
-	//sub-process exit
-	if (_AtlModule.ClientEntry(hInstance,hPrevInstance,lpCmdLine,nShowCmd) >= 0)
-		return 0;
+	HRESULT hr = S_OK;
+	//Don't create sub-process when cmdline include 'cmds' strings
+	{
+		TCHAR cmds[4][20] = {_T("UnregServer"),_T("RegServer"),_T("UnregServerPerUser"),_T("RegServerPerUser")};
+		CString strCmdLine = GetCommandLine();
+		for(int index = 0; index < _countof(cmds) ; index++)
+		{
+			if(strCmdLine.Find(cmds[index]) != -1)
+			{
+				hr = E_FAIL;
+				break;
+			}
+		}
+	}
+
+	if(SUCCEEDED(hr))
+	{
+		//sub-process exit
+		if (_AtlModule.ClientEntry(hInstance,hPrevInstance,lpCmdLine,nShowCmd) >= 0)
+			return 0;
+	}
 	return _AtlModule.WinMain(nShowCmd);
 }
 

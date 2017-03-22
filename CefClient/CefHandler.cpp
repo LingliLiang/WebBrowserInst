@@ -144,6 +144,7 @@ void CefHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 {
 	CEF_REQUIRE_UI_THREAD();
 	// Remove from the list of existing browsers.
+		::OutputDebugString(L"CefHandler::OnBeforeClose\n");
 	BrowserList::iterator bit = browser_list_.begin();
 	for (; bit != browser_list_.end(); ++bit) {
 		if ((*bit)->IsSame(browser)) {
@@ -159,7 +160,7 @@ void CefHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 	}
 	if (browser_list_.empty()) {
 		// All browser windows have closed. Quit the application message loop.
-		CefQuitMessageLoop();
+		//CefQuitMessageLoop();
 	}
 }
 

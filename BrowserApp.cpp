@@ -11,6 +11,20 @@ CBrowserApp::CBrowserApp()
 
 HRESULT CBrowserApp::FinalConstruct()
 {
+	IBrowser* p = NULL;
+	//create shadow browser incase close windowed-browser exit CefRunMessageLoop
+	//if(SUCCEEDED(CreateBrowser(&p)))
+	//{
+	//	CComBSTR str;
+	//	str = _T("http://global.bing.com/");
+	//	p->put_HomePage(str);
+	//	p->put_FrameRate(1);
+	//	p->put_RenderMode(WindowLess);
+	//	RECT rc = {0,0,128,72};
+	//	p->put_ViewRect(rc);
+	//	return ShowBrowser(p);
+	//}
+	//return E_UNEXPECTED;
 	return S_OK;
 }
 
@@ -21,7 +35,7 @@ void CBrowserApp::FinalRelease()
 STDMETHODIMP CBrowserApp::QuitApp()
 {
 	// TODO: Add your implementation code here
-	CefQuitMessageLoop();
+	//CefQuitMessageLoop();
 	Fire_Exit();
 	return S_OK;
 }
@@ -45,10 +59,10 @@ STDMETHODIMP CBrowserApp::Add(CBrowser* pBrowser)
 
 STDMETHODIMP CBrowserApp::Close(ULONG ulIndex)
 {
-	// index id 1-based
+	// index id 1-based, 0 is hide browser
 	if (ulIndex < 1 || ulIndex > m_vecBrowsers.size())
 		return E_INVALIDARG;
-	m_vecBrowsers.erase(m_vecBrowsers.begin() + ulIndex -1);
+	m_vecBrowsers.erase(m_vecBrowsers.begin() + ulIndex);
 	return S_OK;
 }
 
@@ -64,7 +78,7 @@ STDMETHODIMP CBrowserApp::CloseIdentify(LONG lId)
 STDMETHODIMP CBrowserApp::get_Count(LONG* pVal)
 {
 	// TODO: Add your implementation code here
-	*pVal = (LONG)m_vecBrowsers.size();
+	*pVal = (LONG)m_vecBrowsers.size() - 1;
 	return S_OK;
 }
 
@@ -82,7 +96,7 @@ STDMETHODIMP CBrowserApp::get_Item(LONG index, IBrowser** pVal)
 	// TODO: Add your implementation code here
 	if (index < 1 || index > m_vecBrowsers.size())
 		return E_INVALIDARG;
-	CBrowserObj& obj = m_vecBrowsers[index - 1];
+	CBrowserObj& obj = m_vecBrowsers[index];
 	HRESULT hr = obj.QueryInterface(IID_IBrowser,(void**)pVal);
 	if (FAILED(hr))
 	{
@@ -126,7 +140,7 @@ STDMETHODIMP CBrowserApp::CreateBrowser(IBrowser** pVal)
 	CComBSTR str;
 	str = _T("http://www.nagasoft.cn/");
 	pIBrowser->put_HomePage(str);
-	m_vecBrowsers.push_back(*p);
+	Add(p);
 	*pVal = pIBrowser;
 	return S_OK;
 }

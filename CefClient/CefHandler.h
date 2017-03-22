@@ -98,7 +98,7 @@ public:
 	// Request that all existing browser windows close.
 	void CloseAllBrowsers(bool force_close);
 
-	bool	IsClosing() const 
+	bool	IsClosed() const 
 	{ 
 		return m_bIsClose; 
 	}
