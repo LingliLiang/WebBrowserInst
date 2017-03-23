@@ -65,6 +65,13 @@ void CefHandler::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& t
 	else {
 		// Set the title of the window using platform APIs.
 		//PlatformTitleChange(browser, title);
+		assert(ibrowser_map_[browser->GetIdentifier()].p);
+		{
+			CComPtr<IBrowserNotify> spNotify;
+			ibrowser_map_[browser->GetIdentifier()]->QueryInterface(IID_IBrowserNotify,(void**)&spNotify);
+			CComBSTR str = title.c_str(); 
+			if(spNotify) spNotify->OnTitleChange(str);
+		}
 	}
 }
 
@@ -283,7 +290,9 @@ bool CefHandler::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
 }
 
 bool CefHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) {
-	RECT rectClid = { 0,16,1280,720 };
+	RECT rectClid = {0};
+	assert(ibrowser_map_[browser->GetIdentifier()].p);
+	ibrowser_map_[browser->GetIdentifier()]->get_ViewRect(&rectClid);
 	::OutputDebugString(L"CefHandler::GetViewRect\n");
 	rect.Set(rectClid.left, rectClid.top, rectClid.right, rectClid.bottom);
 	return true;
@@ -314,7 +323,12 @@ void CefHandler::OnPaint(CefRefPtr<CefBrowser> browser,
 	const void* buffer,
 	int width, int height) {
 	::OutputDebugString(L"CefHandler::OnPaint\n");
-
+	assert(ibrowser_map_[browser->GetIdentifier()].p);
+	{
+		CComPtr<IBrowserNotify> spNotify;
+		ibrowser_map_[browser->GetIdentifier()]->QueryInterface(IID_IBrowserNotify,(void**)&spNotify);
+		if(spNotify) spNotify->OnRender((const CHAR*)buffer,width,height);
+	}
 }
 
 void CefHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,

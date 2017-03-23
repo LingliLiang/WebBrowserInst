@@ -25,7 +25,7 @@ class ATL_NO_VTABLE CBrowser :
 	public IConnectionPointContainerImpl<CBrowser>,
 	public CProxy_IBrowserEvents<CBrowser>,
 	public IDispatchImpl<IBrowser, &IID_IBrowser, &LIBID_WebBrowserInstanceLib, /*wMajor =*/ 1, /*wMinor =*/ 0>,
-	public IDispatchImpl<IBrowserNotify, &__uuidof(IBrowserNotify), &LIBID_WebBrowserInstanceLib, /* wMajor = */ 1, /* wMinor = */ 0>
+	public IDispatchImpl<IBrowserNotify, &__uuidof(IBrowserNotify)>
 {
 public:
 	CBrowser();
@@ -35,7 +35,7 @@ public:
 
 	BEGIN_COM_MAP(CBrowser)
 		COM_INTERFACE_ENTRY(IBrowser)
-		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY2(IDispatch,IBrowser)
 		COM_INTERFACE_ENTRY(IConnectionPointContainer)
 		COM_INTERFACE_ENTRY(IBrowserNotify)
 	END_COM_MAP()
@@ -65,7 +65,9 @@ private:
 public:
 	// IBrowserNotify Methods
 	STDMETHOD(OnTitleChange)(BSTR title);
-	
+	//window-less handle
+	STDMETHOD(OnRender)(const CHAR* buffer, LONG width, LONG height);
+
 public:
 	// IBrowser Methods
 	STDMETHOD(get_HomePage)(BSTR* pVal);
@@ -91,8 +93,12 @@ public:
 	STDMETHOD(StopLoading)();
 	STDMETHOD(Close)();
 	STDMETHOD(RemoveBrowserRef)();
-	
+
 	STDMETHOD(MessageProc)(LONGLONG hWnd, ULONG msg, ULONGLONG wParam, LONGLONG lParam);
+
+
+	// IBrowserNotify Methods
+public:
 };
 
 //OBJECT_ENTRY_AUTO(__uuidof(Browser), CBrowser)

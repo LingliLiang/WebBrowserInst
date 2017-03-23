@@ -25,6 +25,7 @@ HRESULT CBrowserApp::FinalConstruct()
 	//	return ShowBrowser(p);
 	//}
 	//return E_UNEXPECTED;
+	m_vecBrowsers.push_back(CBrowserObj(p));
 	return S_OK;
 }
 
@@ -138,7 +139,7 @@ STDMETHODIMP CBrowserApp::CreateBrowser(IBrowser** pVal)
 		return E_UNEXPECTED;
 	}
 	CComBSTR str;
-	str = _T("http://www.nagasoft.cn/");
+	str = _T("http://www.baidu.com/");
 	pIBrowser->put_HomePage(str);
 	Add(p);
 	*pVal = pIBrowser;

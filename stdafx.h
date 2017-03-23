@@ -44,3 +44,4 @@ using namespace ATL;
 #define WBI_PCHECK(pointer) if(!pointer) return E_POINTER
 #define WBI_REFCHECK(ref) if(!ref.get()) return E_POINTER
 #define WBI_PREFCHECK(pointerref) if(!pointerref || !((*pointerref).get())) return E_POINTER
+extern "C" const GUID ;

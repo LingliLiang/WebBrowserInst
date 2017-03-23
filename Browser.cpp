@@ -239,3 +239,20 @@ STDMETHODIMP CBrowser::MessageProc(LONGLONG hWnd, ULONG msg, ULONGLONG wParam, L
 
 	return S_OK;
 }
+
+STDMETHODIMP CBrowser::OnRender(const CHAR* buffer, LONG width, LONG height)
+{
+	// buffer -> BGRA
+	//a new hGlobal handle is to be allocated instead;
+	//automatically free the hGlobal parameter
+	 IStream* pStream = NULL;
+	 HRESULT hr = S_OK;
+	hr = CreateStreamOnHGlobal(NULL,TRUE,&pStream);
+	if(SUCCEEDED(hr))
+	{
+		CComPtr<IStream> spStream;
+		spStream.Attach(pStream);
+		Fire_RenderStream(spStream,width, height);
+	}
+	return S_OK;
+}
