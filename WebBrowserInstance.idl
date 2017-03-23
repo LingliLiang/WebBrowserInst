@@ -44,7 +44,7 @@ interface IBrowserApp : IDispatch{
 	pointer_default(unique),
 	oleautomation
 ]
-interface IBrowser : IDispatch{
+interface IBrowser : IDispatch {
 	[propget, id(1)] HRESULT HomePage([out, retval] BSTR* pVal);
 	[propput, id(1)] HRESULT HomePage([in] BSTR newVal);
 	[propget, id(2)] HRESULT RenderMode([out, retval] BrowserRenderMode* pVal);
@@ -69,8 +69,10 @@ interface IBrowser : IDispatch{
 	[id(0x0046), helpstring("close browser")] HRESULT Close();
 	[id(0x0047), local] HRESULT RemoveBrowserRef();
 
-	[id(0x0048), helpstring("handle off screen message proc")] HRESULT MessageProc([in] LONGLONG hWnd, [in] ULONG msg, [in] ULONGLONG wParam, [in] LONGLONG lParam);
-		
+	[id(0x0080), helpstring("handle off screen message proc")] HRESULT MessageProc([in] LONGLONG hWnd, [in] ULONG msg, [in] ULONGLONG wParam, [in] LONGLONG lParam);
+
+	[id(0x0048), helpstring("Convert IStream to char's buffer")] HRESULT ConvertStream([in] IStream* pStream, [out] ULONG* pLen,[out, retval] CHAR* pVal);
+
 };
 [
 	uuid(F6C5B1BA-3A7B-4718-B300-CEFABE1120AF),

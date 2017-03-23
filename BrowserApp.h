@@ -54,12 +54,13 @@ END_CONNECTION_POINT_MAP()
 	void FinalRelease();
 
 private:
-	std::vector<CBrowserObj> m_vecBrowsers;
+	typedef std::vector<CBrowserObj*>::iterator BrowserObjIter;
+	std::vector<CBrowserObj*> m_vecBrowsers;
 public:
 
 	STDMETHOD(QuitApp)();
 	STDMETHOD(CloseAll)();
-	STDMETHOD(Add)(CBrowser* pBrowser);
+	STDMETHOD(Add)(CBrowserObj* pBrowser);
 	STDMETHOD(Close)(ULONG ulIndex);
 	STDMETHOD(CloseIdentify)(LONG lId);
 	STDMETHOD(get_Count)(LONG* pVal);

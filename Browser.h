@@ -96,9 +96,7 @@ public:
 
 	STDMETHOD(MessageProc)(LONGLONG hWnd, ULONG msg, ULONGLONG wParam, LONGLONG lParam);
 
-
-	// IBrowserNotify Methods
-public:
+	STDMETHOD(ConvertStream)(IStream* pStream, ULONG* pLen, CHAR* pVal);
 };
 
 //OBJECT_ENTRY_AUTO(__uuidof(Browser), CBrowser)

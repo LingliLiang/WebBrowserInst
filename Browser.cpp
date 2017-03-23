@@ -17,7 +17,7 @@ CBrowser::CBrowser()
 
 HRESULT CBrowser::FinalConstruct()
 {
-	
+
 	return S_OK;
 }
 
@@ -37,7 +37,7 @@ void CBrowser::put_BrowserRefPoint(CefRefPtr<CefBrowser>** p)
 
 STDMETHODIMP CBrowser::get_HomePage(BSTR* pVal)
 {
-	if(*pVal) return E_INVALIDARG;
+	if (*pVal) return E_INVALIDARG;
 	*pVal = m_strHomePage.AllocSysString();
 	return S_OK;
 }
@@ -66,7 +66,7 @@ STDMETHODIMP CBrowser::get_RenderMode(BrowserRenderMode* pVal)
 
 STDMETHODIMP CBrowser::put_RenderMode(BrowserRenderMode newVal)
 {
-	if(newVal<WindowLess || newVal>AsPopup)
+	if (newVal<WindowLess || newVal>AsPopup)
 		return E_INVALIDARG;
 	m_mode = newVal;
 	return S_OK;
@@ -101,7 +101,7 @@ STDMETHODIMP CBrowser::get_ViewRect(RECT* pVal)
 STDMETHODIMP CBrowser::put_ViewRect(RECT newVal)
 {
 	CRect viewRect = newVal;
-	if(viewRect.IsRectNull()) return E_INVALIDARG;
+	if (viewRect.IsRectNull()) return E_INVALIDARG;
 	m_viewRect = viewRect;
 	return S_OK;
 }
@@ -110,7 +110,7 @@ STDMETHODIMP CBrowser::put_ViewRect(RECT newVal)
 STDMETHODIMP CBrowser::get_Busy(VARIANT_BOOL* pVal)
 {
 	WBI_PREFCHECK(m_BrowserRef);
-	*pVal  = (*m_BrowserRef)->IsLoading() ? VARIANT_TRUE : VARIANT_FALSE;
+	*pVal = (*m_BrowserRef)->IsLoading() ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -243,16 +243,44 @@ STDMETHODIMP CBrowser::MessageProc(LONGLONG hWnd, ULONG msg, ULONGLONG wParam, L
 STDMETHODIMP CBrowser::OnRender(const CHAR* buffer, LONG width, LONG height)
 {
 	// buffer -> BGRA
+	IStream* pStream = NULL;
+	HRESULT hr = S_OK;
 	//a new hGlobal handle is to be allocated instead;
 	//automatically free the hGlobal parameter
-	 IStream* pStream = NULL;
-	 HRESULT hr = S_OK;
-	hr = CreateStreamOnHGlobal(NULL,TRUE,&pStream);
-	if(SUCCEEDED(hr))
+	hr = CreateStreamOnHGlobal(NULL, TRUE, &pStream);
+	if (SUCCEEDED(hr))
 	{
-		CComPtr<IStream> spStream;
-		spStream.Attach(pStream);
-		Fire_RenderStream(spStream,width, height);
+		ULONG cbLen = width * height * 4;
+		ULARGE_INTEGER size = { cbLen };
+		LARGE_INTEGER cur = { 0 };
+		ULONG cbWrite = 0;
+		CComPtr<IStream> spStream = pStream;
+		hr = spStream->SetSize(size);
+		hr = spStream->Write(buffer, cbLen, &cbWrite);
+		hr = spStream->Seek(cur, STREAM_SEEK_SET, NULL);//reset to begain
+		hr = spStream->Commit(STGC_OVERWRITE);
+		Fire_RenderStream(spStream, width, height);
 	}
-	return S_OK;
+	return hr;
+}
+
+
+STDMETHODIMP CBrowser::ConvertStream(IStream* pStream, ULONG* pLen, CHAR* pVal)
+{
+	HRESULT hr = S_OK;
+	CComPtr<IStream> spStream = pStream;
+	LARGE_INTEGER cur = { 0 };
+	STATSTG statData = { 0 };
+	hr = spStream->Seek(cur, STREAM_SEEK_SET, NULL);
+	hr = spStream->Stat(&statData, STATFLAG_NONAME);//exclude name - reduces time and resources used in an allocation and free operation.
+	if (SUCCEEDED(hr))
+	{
+		assert(pVal == NULL);
+		pVal = new CHAR[statData.cbSize.QuadPart+1];
+		if (pVal == NULL) return E_OUTOFMEMORY;
+		ULONG cbLen = (ULONG)statData.cbSize.QuadPart;
+		hr = spStream->Read(pVal, cbLen, pLen);
+	}
+	
+	return hr;
 }

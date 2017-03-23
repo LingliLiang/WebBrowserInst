@@ -25,7 +25,7 @@ HRESULT CBrowserApp::FinalConstruct()
 	//	return ShowBrowser(p);
 	//}
 	//return E_UNEXPECTED;
-	m_vecBrowsers.push_back(CBrowserObj(p));
+	Add(new CBrowserObj);
 	return S_OK;
 }
 
@@ -45,15 +45,22 @@ STDMETHODIMP CBrowserApp::QuitApp()
 STDMETHODIMP CBrowserApp::CloseAll()
 {
 	// TODO: Add your implementation code here
+	BrowserObjIter iter = m_vecBrowsers.begin();
+	while (iter != m_vecBrowsers.end())
+	{
+		(*iter)->Release();
+		iter++;
+	}
 	m_vecBrowsers.clear();
 	return S_OK;
 }
 
 
-STDMETHODIMP CBrowserApp::Add(CBrowser* pBrowser)
+STDMETHODIMP CBrowserApp::Add(CBrowserObj* pBrowser)
 {
 	// TODO: Add your implementation code here
-	m_vecBrowsers.push_back(CBrowserObj(pBrowser));
+	pBrowser->AddRef();
+	m_vecBrowsers.push_back(pBrowser);
 	return S_OK;
 }
 
@@ -63,7 +70,9 @@ STDMETHODIMP CBrowserApp::Close(ULONG ulIndex)
 	// index id 1-based, 0 is hide browser
 	if (ulIndex < 1 || ulIndex > m_vecBrowsers.size())
 		return E_INVALIDARG;
-	m_vecBrowsers.erase(m_vecBrowsers.begin() + ulIndex);
+	BrowserObjIter iter = m_vecBrowsers.begin() + ulIndex;
+	(*iter)->Release();
+	m_vecBrowsers.erase(iter);
 	return S_OK;
 }
 
@@ -97,8 +106,8 @@ STDMETHODIMP CBrowserApp::get_Item(LONG index, IBrowser** pVal)
 	// TODO: Add your implementation code here
 	if (index < 1 || index > m_vecBrowsers.size())
 		return E_INVALIDARG;
-	CBrowserObj& obj = m_vecBrowsers[index];
-	HRESULT hr = obj.QueryInterface(IID_IBrowser,(void**)pVal);
+	CBrowserObj* & obj = m_vecBrowsers[index];
+	HRESULT hr = obj->QueryInterface(IID_IBrowser,(void**)pVal);
 	if (FAILED(hr))
 	{
 		return E_UNEXPECTED;

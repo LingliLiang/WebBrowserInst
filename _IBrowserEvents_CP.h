@@ -30,7 +30,7 @@ public:
 				CComVariant varResult;
 
 				DISPPARAMS params = { avarParams, NULL, 3, 0 };
-				hr = pConnection->Invoke(2, IID_NULL, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, &varResult, NULL, NULL);
+				hr = pConnection->Invoke(1, IID_NULL, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, &varResult, NULL, NULL);
 			}
 		}
 		return hr;
