@@ -52,8 +52,10 @@ public:
 
 public:
 	void put_BrowserRefPoint(CefRefPtr<CefBrowser>** p);
-
+	void FilpMemoryVer(void* pSrc, size_t len, size_t height, size_t width, size_t step);
+	void FilpMemoryHor(void* pSrc, size_t len, size_t height, size_t width, size_t step);
 private:
+
 	CString  m_strHomePage;
 	BrowserRenderMode m_mode;
 	long m_frameRate;

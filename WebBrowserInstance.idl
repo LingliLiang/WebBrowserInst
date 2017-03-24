@@ -105,7 +105,8 @@ library WebBrowserInstanceLib
 	{
 		properties:
 		methods:
-			[id(1)] HRESULT RenderStream([in] IStream* pStream,[in] LONG width,[in] LONG height);
+			[id(1)] HRESULT RenderStream([in] IUnknown** pStream,[in] LONG width,[in] LONG height);
+			[id(2)] HRESULT RenderArray([in] VARIANT arrBuffer,[in] LONG width,[in] LONG height);
 	};
 	[
 		uuid("7F62EFA2-F6D3-41BD-9C7C-2071CE58B2FB"),

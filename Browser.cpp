@@ -27,6 +27,62 @@ void CBrowser::FinalRelease()
 }
 
 
+void CBrowser::FilpMemoryVer(void* pSrc, size_t len, size_t height, size_t width, size_t step)
+{
+	assert((len%step) == 0);
+	assert(step);
+	assert(pSrc);
+	BYTE* pTemp = new BYTE[step];
+	size_t times = height/2;
+	BYTE* head = (BYTE*)pSrc,*tail = (BYTE*)pSrc+len-step;
+	for(size_t index = 0; index < times; index++)
+	{
+		::memcpy_s(pTemp,step,head,step);
+		::memcpy_s(head,step,tail,step);
+		::memcpy_s(tail,step,pTemp,step);
+		head += step;
+		tail -= step;
+	}
+	delete pTemp;
+}
+
+void FilpMemory2(void* pSrc, size_t len, size_t height, size_t width, size_t step)
+{
+	assert((len%step) == 0);
+	assert(step);
+	assert(pSrc);
+	BYTE* pTemp = new BYTE[step];
+	size_t times = len / step / 2;
+	BYTE* head = (BYTE*)pSrc,*tail = (BYTE*)pSrc+len-step;
+	for(size_t index = 0; index < times; index++)
+	{
+		::memcpy_s(pTemp,step,head,step);
+		//FilpMemory(pTemp,step,1);
+		::memcpy_s(head,step,tail,step);
+		//FilpMemory(head,step,1);
+		::memcpy_s(tail,step,pTemp,step);
+		head += step;
+		tail -= step;
+	}
+	delete pTemp;
+}
+
+void CBrowser::FilpMemoryHor(void* pSrc, size_t len, size_t height, size_t width, size_t step)
+{
+	assert((width%step) == 0);
+	assert(height);
+	assert(step);
+	assert(pSrc);
+	size_t times = height;
+	BYTE* cur = (BYTE*)pSrc;
+	for(size_t index = 0; index < times; index++)
+	{
+		//FilpMemoryVer(cur,width,step);
+		cur += width;
+	}
+}
+
+
 void CBrowser::put_BrowserRefPoint(CefRefPtr<CefBrowser>** p)
 {
 	if (p && (*p)) {
@@ -244,23 +300,66 @@ STDMETHODIMP CBrowser::OnRender(const CHAR* buffer, LONG width, LONG height)
 {
 	// buffer -> BGRA
 	IStream* pStream = NULL;
+	IStream* pDstStream = NULL;
 	HRESULT hr = S_OK;
+	ULONG cbLen = width * height * 4;
+	VARIANT arrBuffer;
+	VariantInit(&arrBuffer);
+	arrBuffer.vt = VT_ARRAY  | VT_I1;
+	SAFEARRAY*  pSArr = NULL;
+	SAFEARRAYBOUND saBounds = {cbLen+1,0};	pSArr = SafeArrayCreate(VT_I1,1,&saBounds);
+	DWORD sss = ::GetLastError();
+	char* pdata = NULL;
+	SafeArrayAccessData(pSArr,(VOID**)&pdata);
+	::memcpy(pdata,buffer,cbLen);
+	//FilpMemoryHor(pdata,cbLen,height,width,4);
+	//FilpMemoryVer(pdata,cbLen,height,width,4);
+	FilpMemoryVer(pdata,cbLen,height,width,width);
+	pdata[cbLen] = '\0';
+	SafeArrayUnaccessData(pSArr);
+	arrBuffer.parray = pSArr;
+	Fire_RenderArray(arrBuffer,width, height);
+	SafeArrayDestroy(arrBuffer.parray);
+	return S_OK;
+
 	//a new hGlobal handle is to be allocated instead;
 	//automatically free the hGlobal parameter
-	hr = CreateStreamOnHGlobal(NULL, TRUE, &pStream);
+	hr = CreateStreamOnHGlobal(NULL, TRUE, &pStream); //pStream had 1 ref
+	ULONG ref = 0;
 	if (SUCCEEDED(hr))
 	{
 		ULONG cbLen = width * height * 4;
 		ULARGE_INTEGER size = { cbLen };
 		LARGE_INTEGER cur = { 0 };
 		ULONG cbWrite = 0;
-		CComPtr<IStream> spStream = pStream;
+		CComPtr<IStream> spStream;
+		spStream.Attach(pStream);
 		hr = spStream->SetSize(size);
 		hr = spStream->Write(buffer, cbLen, &cbWrite);
 		hr = spStream->Seek(cur, STREAM_SEEK_SET, NULL);//reset to begain
 		hr = spStream->Commit(STGC_OVERWRITE);
-		Fire_RenderStream(spStream, width, height);
+		STATSTG statData = { 0 };
+		hr = spStream->Stat(&statData, STATFLAG_NONAME);
+		ATLTRACE("%s -- %x\n","pStream",pStream);
+		// Marshal  pStream to pDstStream
+		hr = CreateStreamOnHGlobal(NULL, TRUE, &pDstStream); //pDstStream had 1 ref
+		if(SUCCEEDED(hr))
+			ATLTRACE("%s -- %x\n","pDstStream",pDstStream);
+		hr = ::CoMarshalInterface(pDstStream,IID_IStream,spStream,MSHCTX_LOCAL,NULL,MSHLFLAGS_TABLESTRONG);
+		if(SUCCEEDED(hr))
+		{
+			pDstStream->Seek(cur, STREAM_SEEK_SET, NULL);//reset to begain
+
+			if(FAILED(Fire_RenderStream((IUnknown**)&pDstStream, width, height)))
+			{
+				CComPtr<IStream> pFailedStream = NULL;
+				hr = ::CoGetInterfaceAndReleaseStream(pDstStream,IID_IStream,(void**)&pFailedStream);
+			}
+			ref = pStream->AddRef();
+			ref = pStream->Release();
+		}
 	}
+
 	return hr;
 }
 
