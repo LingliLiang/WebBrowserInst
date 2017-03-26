@@ -1,8 +1,10 @@
 #pragma once
 
 #include <atlcom.h>
+#include <atltypes.h>
 #include <initguid.h>
-#include ".\x64\Debug\webbrowserinstance.tlh"
+#import "..\x64\Debug\WebBrowserInstance.exe"
+//#include ".\x64\Debug\webbrowserinstance.tlh"
 //#include "..\WebBrowserInst\WebBrowserInstance_i.h"
 #include "..\WebBrowserInst\WebBrowserInstance_i.c"
 
@@ -11,8 +13,10 @@ using namespace WebBrowserInstanceLib;
 class IBrowserEvents
 {
 public:
-	virtual void RenderStream(IStream * pStream, LONG width, LONG height){};
+	virtual void RenderStream(IStream ** pStream, LONG width, LONG height){}
+	virtual void RenderArray(VARIANT arrBuffer, LONG width, LONG height){}
 };
+
 
 class CBrowserEventHandler
 	:public CComObjectRoot
@@ -20,7 +24,7 @@ class CBrowserEventHandler
 	,public _IBrowserEvents
 {
 public:
-	CBrowserEventHandler(const IID iid_event_src);
+	CBrowserEventHandler();
 	~CBrowserEventHandler();
 
 	BEGIN_COM_MAP(CBrowserEventHandler)
@@ -58,18 +62,17 @@ public:
 		VARIANT *pVarResult,
 		EXCEPINFO *pExcepInfo,
 		UINT *puArgErr);
-	// _IBrowserEvents
-private:
 
 public:
-	BOOL AdviseEvent(IUnknown* pEventSrc, IBrowserEvents* pEndPoint);
+	BOOL AdviseEvent(IUnknown* pEventSrc, const IID iid_event_src, IBrowserEvents* pEndPoint);
 	BOOL ReleaseEvent();
 private:
-	IBrowserEvents* m_pEndPoint;
+	IBrowserEvents* m_pEndPoint; // _IBrowserEvents
 	DWORD m_dwCookie;
 	CComPtr<IUnknown> m_pSrc;
-	const IID m_iidSrc;
+	IID m_iidSrc;
 };
+
 
 class CBrowserBase
 	:public IBrowserEvents
@@ -77,44 +80,29 @@ class CBrowserBase
 public:
 	CBrowserBase();
 	~CBrowserBase();
-protected:
-	HRESULT InitInstance()
-	{
-		HRESULT hr = S_OK;
-		CComObject<CBrowserEventHandler>* pEHander = NULL;
-		hr = m_spEHander.CreateInstance(&pEHander);
-		if (FAILED(hr)) return hr;
-		m_spEHander.SetVoid(pEHander);
-		m_spEHander.AddRef();
-		hr = CoCreateInstance(CLSID_BrowserApp,NULL,CLSCTX_SERVER, IID_IBrowserApp,(void**)&m_spApp);
-		if (FAILED(hr)) return hr;
-		hr = m_spApp->CreateBrowser(&m_spBrowser);
-		if (FAILED(hr)) return hr;
-		m_spBrowser->put_FrameRate(30);
-		m_spBrowser->put_RenderMode(WindowLess);
-		RECT rc = {0,0,1280,720};
-		m_spBrowser->put_ViewRect(rc);
-		hr = m_spApp->ShowBrowser(m_spBrowser);
-		if (FAILED(hr)) return hr;
-		m_spEHander.AdviseEvent(m_spBrowser, this);
-		return hr;
-	}
 
-	HRESULT UnInit()
-	{
-		m_spEHander.AdviseEvent(m_spBrowser, this);
-	}
+	virtual void RenderBuffer(void * pBuffer, ULONG len);
+
+	HRESULT InitInstance();
+
+	HRESULT UnInit();
+
+	BOOL IsInitialized();
+
+	CRect m_viewRc;
+	CString m_homePage;
+	UINT m_fps;
+	HWND m_hbrowserWnd;
+	BrowserRenderMode m_renderMode;
+protected:
+
+	virtual void RenderStream(IStream ** pStream, LONG width, LONG height);
+
+	virtual void RenderArray(VARIANT arrBuffer, LONG width, LONG height);
 
 	CComPtr<IBrowserApp> m_spApp;
 	CComPtr<IBrowser> m_spBrowser;
-	CComObject<CBrowserEventHandler> m_spEHander;
+	CComObject<CBrowserEventHandler>* m_spEHander;
+private:
+	BOOL m_bInit; 
 };
-
-CBrowserBase::CBrowserBase()
-	:m_spEHander(0)
-{
-}
-
-CBrowserBase::~CBrowserBase()
-{
-}

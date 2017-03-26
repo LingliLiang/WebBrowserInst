@@ -31,6 +31,7 @@ HRESULT CBrowserApp::FinalConstruct()
 
 void CBrowserApp::FinalRelease()
 {
+	ATLTRACE("%s --\n", "CBrowserApp FinalRelease");
 }
 
 STDMETHODIMP CBrowserApp::QuitApp()
@@ -80,7 +81,18 @@ STDMETHODIMP CBrowserApp::Close(ULONG ulIndex)
 STDMETHODIMP CBrowserApp::CloseIdentify(LONG lId)
 {
 	// TODO: Add your implementation code here
-	
+	BrowserObjIter iter = m_vecBrowsers.begin();
+	while (iter != m_vecBrowsers.end())
+	{
+		LONG id = 0;
+		if (SUCCEEDED((*iter)->get_Identifier(&id)) && id == lId)
+		{
+			(*iter)->Release();
+			m_vecBrowsers.erase(iter);
+			break;
+		}
+		iter++;
+	}
 	return S_OK;
 }
 
@@ -161,16 +173,19 @@ STDMETHODIMP CBrowserApp::ShowBrowser(IBrowser* pVal)
 	if(!pVal) return E_INVALIDARG;
 	CefHandler* pInst = CefHandler::GetInstance();
 	RECT rc={0};
+	ULONG_PTR hWnd = NULL;
+	pVal->get_ViewRect(&rc);
+	pVal->get_ParentWnd(&hWnd);
 	if(pInst)
 	{
-		SUCCEEDED(pInst->CreateBrowser(pVal,NULL,rc));
+		SUCCEEDED(pInst->CreateBrowser(pVal, (HWND)hWnd,rc));
 	}
 	else
 	{
 		// SimpleHandler implements browser-level callbacks.
 		CefRefPtr<CefHandler> handler(new CefHandler(false));
 		pInst = CefHandler::GetInstance();
-		SUCCEEDED(pInst->CreateBrowser(pVal,NULL,rc));
+		SUCCEEDED(pInst->CreateBrowser(pVal, (HWND)hWnd,rc));
 	}
 	return S_OK;
 }

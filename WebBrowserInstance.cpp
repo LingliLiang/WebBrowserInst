@@ -97,13 +97,14 @@ public:
 
 		// Shut down CEF.
 		CefShutdown();
-
+		ATLTRACE("%s --\n", "CefRunMessageLoop Shutdown");
 		MSG msg;
 		while (GetMessage(&msg, 0, 0, 0) > 0)
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+		ATLTRACE("%s --\n", "MessageLoop Shutdown");
 	}
 
 	LONG Unlock() throw()
@@ -121,8 +122,8 @@ public:
 			}
 			else
 			{
-				//::PostThreadMessage(m_dwMainThreadID, WM_QUIT, 0, 0);
 				CefQuitMessageLoop(); // replace qiut message
+				::PostThreadMessage(m_dwMainThreadID, WM_QUIT, 0, 0);
 			}
 		}
 
@@ -131,15 +132,6 @@ public:
 		return lRet;
 	}
 
-#ifndef _ATL_NO_COM_SUPPORT
-	void MonitorShutdown() throw()
-	{
-		::WaitForSingleObject(m_hEventShutdown, INFINITE);
-		::CloseHandle(m_hEventShutdown);
-		//::PostThreadMessage(m_dwMainThreadID, WM_QUIT, 0, 0);
-		CefQuitMessageLoop(); // replace qiut message
-	}
-#endif //_ATL_NO_COM_SUPPORT
 private:
 	CString m_ModulePath;
 };

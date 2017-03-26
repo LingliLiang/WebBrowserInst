@@ -20,6 +20,9 @@
     <Filter Include="CefClient">
       <UniqueIdentifier>{a7f371a7-fa29-4632-be5f-281cd289cc4e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shared">
+      <UniqueIdentifier>{b0ca2600-bcaa-4790-8520-eb68a144860d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -48,6 +51,12 @@
     </ClCompile>
     <ClCompile Include="Browser.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="shared\geometry_util.cc">
+      <Filter>shared</Filter>
+    </ClCompile>
+    <ClCompile Include="shared\util_win.cc">
+      <Filter>shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +95,12 @@
     </ClInclude>
     <ClInclude Include="Browser.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="shared\geometry_util.h">
+      <Filter>shared</Filter>
+    </ClInclude>
+    <ClInclude Include="shared\util_win.h">
+      <Filter>shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

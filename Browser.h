@@ -35,7 +35,7 @@ public:
 
 	BEGIN_COM_MAP(CBrowser)
 		COM_INTERFACE_ENTRY(IBrowser)
-		COM_INTERFACE_ENTRY2(IDispatch,IBrowser)
+		COM_INTERFACE_ENTRY2(IDispatch, IBrowser)
 		COM_INTERFACE_ENTRY(IConnectionPointContainer)
 		COM_INTERFACE_ENTRY(IBrowserNotify)
 	END_COM_MAP()
@@ -52,8 +52,42 @@ public:
 
 public:
 	void put_BrowserRefPoint(CefRefPtr<CefBrowser>** p);
-	void FilpMemoryVer(void* pSrc, size_t len, size_t height, size_t width, size_t step);
-	void FilpMemoryHor(void* pSrc, size_t len, size_t height, size_t width, size_t step);
+private:
+	virtual COM_DECLSPEC_NOTHROW void STDMETHODCALLTYPE MessageProcInter(const ULONG_PTR ulhWnd,\
+		const  ULONG message, const  ULONGLONG wParam, const  LONGLONG lParam, const  HRESULT* hr);
+	HRESULT OnMouseEvent(UINT message, WPARAM wParam, LPARAM lParam);
+	HRESULT OnKeyEvent(UINT message, WPARAM wParam, LPARAM lParam);
+
+	HRESULT OnSize();
+	HRESULT OnFocus(bool setFocus);
+	HRESULT OnCaptureLost();
+	HRESULT OnPaint();
+	HRESULT OnEraseBkgnd();
+
+	HRESULT OnIMESetContext(UINT message, WPARAM wParam, LPARAM lParam);
+	HRESULT OnIMEStartComposition();
+	HRESULT OnIMEComposition(UINT message, WPARAM wParam, LPARAM lParam);
+	HRESULT OnIMECancelCompositionEvent();
+
+	// Manage popup bounds.
+	bool IsOverPopupWidget(int x, int y) const;
+	int GetPopupXOffset() const;
+	int GetPopupYOffset() const;
+	void ApplyPopupOffset(int& x, int& y) const;
+
+	float device_scale_factor_;
+
+	// Mouse state tracking.
+	POINT last_mouse_pos_;
+	POINT current_mouse_pos_;
+	bool mouse_rotation_;
+	bool mouse_tracking_;
+	int last_click_x_;
+	int last_click_y_;
+	CefBrowserHost::MouseButtonType last_click_button_;
+	int last_click_count_;
+	double last_click_time_;
+	bool last_mouse_down_on_view_;
 private:
 
 	CString  m_strHomePage;
@@ -61,15 +95,25 @@ private:
 	long m_frameRate;
 	long m_identifier;
 	CRect m_viewRect;
+	HWND m_hParent;
+	HWND m_hSelf;
 	CefRefPtr<CefBrowser>*  m_BrowserRef;
-
+	BOOL m_bKeybroad;
+	BOOL m_bMouse;
 
 public:
 	// IBrowserNotify Methods
 	STDMETHOD(OnTitleChange)(BSTR title);
 	//window-less handle
 	STDMETHOD(OnRender)(const CHAR* buffer, LONG width, LONG height);
+	STDMETHOD(OnAddressChange)(BSTR url);
+	STDMETHOD(OnStatusMessage)(BSTR msg);
+	STDMETHOD(OnClose)();
+	STDMETHOD(OnLoadStart)(ULONG transition_type);
+	STDMETHOD(OnLoadEnd)(LONG httpStatusCode);
+	STDMETHOD(OnLoadError)(LONG error_code, BSTR error_text, BSTR failed_url, BSTR* make_html);
 
+	STDMETHOD(GetViewRect)(RECT* rect);
 public:
 	// IBrowser Methods
 	STDMETHOD(get_HomePage)(BSTR* pVal);
@@ -86,6 +130,10 @@ public:
 	STDMETHOD(put_BrowserRefPoint)(IUnknown** newVal);
 	STDMETHOD(get_Identifier)(LONG* pVal);
 	STDMETHOD(put_Identifier)(LONG newVal);
+	STDMETHOD(get_ParentWnd)(ULONG_PTR* pVal);
+	STDMETHOD(put_ParentWnd)(ULONG_PTR newVal);
+	STDMETHOD(get_BrowserWnd)(ULONG_PTR* pVal);
+	STDMETHOD(put_BrowserWnd)(ULONG_PTR hWnd);
 
 	STDMETHOD(GoHomePage)();
 	STDMETHOD(GoForward)();
@@ -96,9 +144,17 @@ public:
 	STDMETHOD(Close)();
 	STDMETHOD(RemoveBrowserRef)();
 
-	STDMETHOD(MessageProc)(LONGLONG hWnd, ULONG msg, ULONGLONG wParam, LONGLONG lParam);
+	STDMETHOD(MessageProc)(ULONG_PTR ulhWnd, ULONG message, ULONGLONG wParam, LONGLONG lParam);
 
-	STDMETHOD(ConvertStream)(IStream* pStream, ULONG* pLen, CHAR* pVal);
+	STDMETHOD(ConvertStream)(IStream* pStream, ULONG* pLen, CHAR** pVal);
+	STDMETHOD(get_EnableMouse)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_EnableMouse)(VARIANT_BOOL newVal);
+	STDMETHOD(get_EnableKeybroad)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_EnableKeybroad)(VARIANT_BOOL newVal);
+	STDMETHOD(GetScreenPoint)(INT viewX, INT viewY, INT* screenX, INT* screenY);
+	STDMETHOD(GetScreenInfo)(ULONG* screen_info);
+	STDMETHOD(OnPopupShow)(LONG show);
+	STDMETHOD(OnPopupSize)(RECT* rect);
 };
 
 //OBJECT_ENTRY_AUTO(__uuidof(Browser), CBrowser)

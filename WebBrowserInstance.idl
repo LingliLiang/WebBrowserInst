@@ -56,9 +56,14 @@ interface IBrowser : IDispatch {
 	[propget, id(5), helpstring("Loading")] HRESULT Busy([out, retval] VARIANT_BOOL* pVal);
 	[propget, id(6), helpstring("Current Web URL")] HRESULT LocationURL([out, retval] BSTR* pVal);
 	[propget, id(7)] HRESULT IsInvalid([out, retval] VARIANT_BOOL* pVal);
-	[propput, id(8), local] HRESULT BrowserRefPoint([in] IUnknown** newVal);
-	[propget, id(9)] HRESULT Identifier([out, retval] LONG* pVal);
-	[propput, id(9), local] HRESULT Identifier([in] LONG newVal);
+	[propget, id(8)] HRESULT Identifier([out, retval] LONG* pVal);
+	[propget, id(9)] HRESULT ParentWnd([out, retval] ULONG_PTR* pVal);
+	[propput, id(9)] HRESULT ParentWnd([in] ULONG_PTR newVal);
+	[propget, id(10), helpstring("HWND of Browser, manybe is NULL.")] HRESULT BrowserWnd([out, retval] ULONG_PTR* pVal);
+	[propget, id(11), helpstring("Windowless only.")] HRESULT EnableMouse([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(11), helpstring("Windowless only.")] HRESULT EnableMouse([in] VARIANT_BOOL newVal);
+	[propget, id(12), helpstring("Windowless only.")] HRESULT EnableKeybroad([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(12), helpstring("Windowless only.")] HRESULT EnableKeybroad([in] VARIANT_BOOL newVal);
 
 	[id(0x0040), helpstring("Go to home page")] HRESULT GoHomePage();
 	[id(0x0041), helpstring("Browse page forward")] HRESULT GoForward();
@@ -67,12 +72,37 @@ interface IBrowser : IDispatch {
 	[id(0x0044), helpstring("Reload current page")] HRESULT Reload();
 	[id(0x0045), helpstring("Stop loading when it's not finish")] HRESULT StopLoading();
 	[id(0x0046), helpstring("close browser")] HRESULT Close();
-	[id(0x0047), local] HRESULT RemoveBrowserRef();
 
-	[id(0x0080), helpstring("handle off screen message proc")] HRESULT MessageProc([in] LONGLONG hWnd, [in] ULONG msg, [in] ULONGLONG wParam, [in] LONGLONG lParam);
+	[id(0x0047), helpstring("handle off screen message proc")] HRESULT MessageProc([in] ULONG_PTR ulhWnd, [in] ULONG message, [in] ULONGLONG wParam, [in] LONGLONG lParam);
+	[id(0x0048), helpstring("Convert IStream to char's buffer")] HRESULT ConvertStream([in] IStream* pStream, [out] ULONG* pLen,[out] CHAR** pVal);
 
-	[id(0x0048), helpstring("Convert IStream to char's buffer")] HRESULT ConvertStream([in] IStream* pStream, [out] ULONG* pLen,[out, retval] CHAR* pVal);
+};
+[
+	uuid("7F62EFA2-F6D3-41BD-9C7C-2071CE58B2FB"),
+	local,
+	oleautomation
+]
+interface IBrowserNotify : IDispatch
+{
+	[propput, id(1), local] HRESULT BrowserRefPoint([in] IUnknown** newVal);
+	[propput, id(2), local] HRESULT Identifier([in] LONG newVal);
+	[id(3), local] HRESULT RemoveBrowserRef();
+	[propput, id(4), local] HRESULT BrowserWnd([in] ULONG_PTR hWnd);
 
+	[id(21), helpstring("Web title change")] HRESULT OnTitleChange([in] BSTR title);
+	[id(22), helpstring("Render buffer")] HRESULT OnRender([in] const CHAR* buffer, [in] LONG width, [in] LONG height);
+	[id(23), helpstring("Web Address change")] HRESULT OnAddressChange([in] BSTR url);
+	[id(24), helpstring("Web Status Message")] HRESULT OnStatusMessage([in] BSTR msg);
+	[id(25), helpstring("Web Close")] HRESULT OnClose();
+	[id(26), helpstring("Web load page start with Transition type")] HRESULT OnLoadStart([in] ULONG transition_type);
+	[id(27), helpstring("Web load page start end with http Status Code")] HRESULT OnLoadEnd([in] LONG httpStatusCode);
+	[id(28), helpstring("Web load error,making display error html")] HRESULT OnLoadError([in] LONG error_code, [in] BSTR error_text, [in] BSTR failed_url, [in, out] BSTR* make_html);
+
+	[id(29), local] HRESULT GetViewRect([in, out] RECT* rect);
+	[id(30), local] HRESULT GetScreenPoint([in] INT viewX, [in] INT viewY, [in, out] INT* screenX, [in, out] INT* screenY);
+	[id(31), local] HRESULT GetScreenInfo([in] ULONG* screen_info);
+	[id(32), local] HRESULT OnPopupShow([in] LONG show);
+	[id(33), local] HRESULT OnPopupSize([in, out] RECT* rect);
 };
 [
 	uuid(F6C5B1BA-3A7B-4718-B300-CEFABE1120AF),
@@ -107,15 +137,14 @@ library WebBrowserInstanceLib
 		methods:
 			[id(1)] HRESULT RenderStream([in] IUnknown** pStream,[in] LONG width,[in] LONG height);
 			[id(2)] HRESULT RenderArray([in] VARIANT arrBuffer,[in] LONG width,[in] LONG height);
-	};
-	[
-		uuid("7F62EFA2-F6D3-41BD-9C7C-2071CE58B2FB"),
-		local
-	]
-	interface IBrowserNotify  : IDispatch
-	{
-		[id(1), helpstring("Web title change")] HRESULT OnTitleChange([in] BSTR title);
-		[id(2), helpstring("Render buffer")] HRESULT OnRender([in] const CHAR* buffer,[in] LONG width,[in] LONG height);
+			[id(3)] HRESULT TitleChange([in] BSTR title);
+			[id(4)] HRESULT AddressChange([in] BSTR url);
+			[id(5)] HRESULT StatusMessage([in] BSTR msg);
+			[id(6)] HRESULT Close();
+			[id(7)] HRESULT OnLoadStart([in] ULONG transition_type);
+			[id(8)] HRESULT OnLoadEnd([in] LONG httpStatusCode);
+			[id(9)] HRESULT OnLoadError([in] LONG error_code, [in] BSTR error_text, [in] BSTR failed_url, [out] BSTR* make_html);
+
 	};
 	[
 		uuid(22CA57D8-2A4C-4708-ABB8-451F07BBEB8B)		
