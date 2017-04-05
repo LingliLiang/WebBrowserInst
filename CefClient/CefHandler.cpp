@@ -71,9 +71,14 @@ void CefHandler::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& t
 	}
 	else {
 		// Set the title of the window using platform APIs.
-		//PlatformTitleChange(browser, title);
 		NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
 		{
+			BrowserRenderMode rmode = WindowLess;
+			ibrowser_map_[browser->GetIdentifier()]->get_RenderMode(&rmode);
+			if(rmode == AsPopup){
+				CefWindowHandle hwnd = browser->GetHost()->GetWindowHandle();
+				SetWindowText(hwnd, std::wstring(title).c_str());
+			}
 			CComBSTR str = title.c_str();
 			spNotify->OnTitleChange(str);
 		}
@@ -128,7 +133,6 @@ bool CefHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 	case WOD_NEW_POPUP:
 	case WOD_NEW_WINDOW:
 		frame->LoadURL(target_url);
-		//browser->GetMainFrame()->LoadURL(target_url);
 		return true; //cancel create
 	}
 	return false;
@@ -392,6 +396,7 @@ void CefHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
 	CefCursorHandle cursor,
 	CursorType type,
 	const CefCursorInfo& custom_cursor_info) {
+		SetCursor(cursor);
 }
 
 bool CefHandler::StartDragging(CefRefPtr<CefBrowser> browser,

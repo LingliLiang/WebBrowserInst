@@ -193,6 +193,7 @@ STDMETHODIMP CBrowser::OnLoadError(LONG error_code, BSTR error_text, BSTR failed
 	return E_NOTIMPL;
 }
 
+
 STDMETHODIMP CBrowser::GetViewRect(RECT * rect)
 {
 	*rect = m_viewRect;
