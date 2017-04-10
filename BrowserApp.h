@@ -62,6 +62,7 @@ public:
 	STDMETHOD(CloseAll)();
 	STDMETHOD(Add)(CBrowserObj* pBrowser);
 	STDMETHOD(Close)(ULONG ulIndex);
+	STDMETHOD(CloseBrowser)(IBrowser* pVal);
 	STDMETHOD(CloseIdentify)(LONG lId);
 	STDMETHOD(get_Count)(LONG* pVal);
 	STDMETHOD(get_Browser)(IBrowser** pVal);

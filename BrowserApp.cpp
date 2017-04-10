@@ -32,6 +32,9 @@ HRESULT CBrowserApp::FinalConstruct()
 void CBrowserApp::FinalRelease()
 {
 	ATLTRACE("%s --\n", "CBrowserApp FinalRelease");
+	assert(m_vecBrowsers.size() == 1);
+	assert(m_vecBrowsers[0]->Release() == 0);
+	m_vecBrowsers[0] = NULL;
 }
 
 STDMETHODIMP CBrowserApp::QuitApp()
@@ -47,12 +50,13 @@ STDMETHODIMP CBrowserApp::CloseAll()
 {
 	// TODO: Add your implementation code here
 	BrowserObjIter iter = m_vecBrowsers.begin();
+	iter++; //skip first one
 	while (iter != m_vecBrowsers.end())
 	{
 		(*iter)->Release();
-		iter++;
+		iter = m_vecBrowsers.erase(iter);
+		//iter++; //don't Inc
 	}
-	m_vecBrowsers.clear();
 	return S_OK;
 }
 
@@ -78,6 +82,25 @@ STDMETHODIMP CBrowserApp::Close(ULONG ulIndex)
 }
 
 
+STDMETHODIMP CBrowserApp::CloseBrowser(IBrowser* pVal)
+{
+	if(!pVal) return E_INVALIDARG;
+	BrowserObjIter iter = m_vecBrowsers.begin();
+	while (iter != m_vecBrowsers.end())
+	{
+		if (pVal == (*iter))
+		{
+			(*iter)->Release();
+			iter = m_vecBrowsers.erase(iter);
+			break;
+		}
+		else
+			iter++;
+	}
+	return S_OK;
+}
+
+
 STDMETHODIMP CBrowserApp::CloseIdentify(LONG lId)
 {
 	// TODO: Add your implementation code here
@@ -88,10 +111,11 @@ STDMETHODIMP CBrowserApp::CloseIdentify(LONG lId)
 		if (SUCCEEDED((*iter)->get_Identifier(&id)) && id == lId)
 		{
 			(*iter)->Release();
-			m_vecBrowsers.erase(iter);
+			iter = m_vecBrowsers.erase(iter);
 			break;
 		}
-		iter++;
+		else
+			iter++;
 	}
 	return S_OK;
 }

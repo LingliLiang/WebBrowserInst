@@ -28,13 +28,14 @@ interface IBrowserApp : IDispatch{
 	[id(1), helpstring("Quit Browser App, if there havn't other instance.")] HRESULT QuitApp();
 	[id(2), helpstring("Close all browser,don't use this if there other inst")] HRESULT CloseAll();
 	[id(3), helpstring("Close index browser")] HRESULT Close([in] ULONG ulIndex);
-	[id(4), helpstring("close identify's browser")] HRESULT CloseIdentify([in] LONG lId);
-	[propget, id(5)] HRESULT Count([out, retval] LONG* pVal);
+	[id(4), helpstring("close browser")] HRESULT CloseBrowser([in] IBrowser* pVal);
+	[id(5), helpstring("close identify's browser,only work on OSR or auto close(not x close)")] HRESULT CloseIdentify([in] LONG lId);
+	[propget, id(6)] HRESULT Count([out, retval] LONG* pVal);
 	[propget, id(DISPID_VALUE)] HRESULT Item([in] LONG index, [out, retval] IBrowser** pVal);
 	[propget, id(DISPID_NEWENUM)] HRESULT NewEnum([out, retval] IUnknown** pVal);
-	[id(6), helpstring("create browser instance")] HRESULT CreateBrowser([out, retval] IBrowser** pVal);
 	[propget, id(7), helpstring("Get last create browser instance")] HRESULT Browser([out, retval] IBrowser** pVal);
-	[id(8), helpstring("Show browser after create")] HRESULT ShowBrowser([in] IBrowser* pVal);
+	[id(8), helpstring("create browser instance")] HRESULT CreateBrowser([out, retval] IBrowser** pVal);
+	[id(9), helpstring("Show browser after create")] HRESULT ShowBrowser([in] IBrowser* pVal);
 };
 [
 	object,
