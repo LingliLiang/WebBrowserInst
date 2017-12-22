@@ -145,8 +145,9 @@ extern "C" int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HRESULT hr = S_OK;
 	//Don't create sub-process when cmdline include 'cmds' strings
 	{
-		TCHAR cmds[4][20] = {_T("UnregServer"),_T("RegServer"),_T("UnregServerPerUser"),_T("RegServerPerUser")};
+		TCHAR cmds[4][20] = {_T("unregserver"),_T("regserver"),_T("unregserverperuser"),_T("regserverperuser")};
 		CString strCmdLine = GetCommandLine();
+		strCmdLine.MakeLower();
 		for(int index = 0; index < _countof(cmds) ; index++)
 		{
 			if(strCmdLine.Find(cmds[index]) != -1)

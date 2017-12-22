@@ -6,9 +6,10 @@
 #include "shared\geometry_util.h"
 #include "include/wrapper/cef_helpers.h"
 #include "include/wrapper/cef_closure_task.h"
+#include "BGRABlock.h"
 using namespace client;
-// CBrowser
 
+// CBrowser
 CBrowser::CBrowser()
 	:m_mode(AsPopup), m_frameRate(30), m_identifier(0),
 	m_hParent(NULL), m_hSelf(NULL),m_BrowserRef(NULL), m_bMouse(0),m_bKeybroad(0),
@@ -91,13 +92,16 @@ STDMETHODIMP CBrowser::OnTitleChange(BSTR title)
 }
 
 
-STDMETHODIMP CBrowser::OnRender(const CHAR* buffer, LONG width, LONG height)
+STDMETHODIMP CBrowser::OnRender(const BYTE* buffer, LONG width, LONG height, RECT* rects, ULONG rects_count)
 {
+	//IConnectionPointImpl had connect?
+	if(!this->m_vec.GetSize()) return S_OK;
+
 	// buffer -> BGRA
-	IStream* pStream = NULL;
-	IStream* pDstStream = NULL;
+	CBGRABlock block(const_cast<BYTE*>(buffer), height, width, 4);
+
 	HRESULT hr = S_OK;
-	ULONG cbLen = width * height * 4;
+	ULONG cbLen = (ULONG)block.GetBlockLength();
 	VARIANT arrBuffer;
 	VariantInit(&arrBuffer);
 	arrBuffer.vt = VT_ARRAY | VT_I1;
@@ -107,18 +111,19 @@ STDMETHODIMP CBrowser::OnRender(const CHAR* buffer, LONG width, LONG height)
 	DWORD sss = ::GetLastError();
 	char* pdata = NULL;
 	SafeArrayAccessData(pSArr, (VOID**)&pdata);
-	::memcpy(pdata, buffer, cbLen);
-	//FilpMemoryHor(pdata,height,width,4);
-	FilpMemoryVer(pdata, cbLen, width, 4);
+	//::memcpy(pdata,buffer,cbLen);
+	block.GetRectData(*rects, pdata);
 	pdata[cbLen] = '\0';
 	SafeArrayUnaccessData(pSArr);
 	arrBuffer.parray = pSArr;
-	Fire_RenderArray(arrBuffer, width, height);
+	Fire_RenderArray(arrBuffer, rects_count, width, height);
 	SafeArrayDestroy(arrBuffer.parray);
 	return S_OK;
 
 	//a new hGlobal handle is to be allocated instead;
 	//automatically free the hGlobal parameter
+	IStream* pStream = NULL;
+	IStream* pDstStream = NULL;
 	hr = CreateStreamOnHGlobal(NULL, TRUE, &pStream); //pStream had 1 ref
 	ULONG ref = 0;
 	if (SUCCEEDED(hr))
@@ -496,11 +501,12 @@ STDMETHODIMP CBrowser::MessageProc(ULONG_PTR ulhWnd, ULONG message, ULONGLONG wP
 		const ULONG c_message = message;
 		const ULONGLONG c_wParam = wParam;
 		const LONGLONG c_lParam = lParam;
-		const HRESULT* c_hr = &hr;
+		const HRESULT* c_hr = NULL;
 		CefPostTask(TID_UI, base::Bind(&CBrowser::MessageProcInter, base::Unretained(this),\
 			c_ulhWnd, c_message, c_wParam, c_lParam, c_hr/*, base::Unretained(this)*/));
 		return hr;
 	}
+	//ATLTRACE("CBrowser::MessageProc %08x %x %d %d\n", ulhWnd, message, wParam, lParam);
 	MessageProcInter(ulhWnd, message, wParam, lParam, &hr);
 	return hr;
 }
@@ -510,7 +516,7 @@ void CBrowser::MessageProcInter(const ULONG_PTR ulhWnd, const  ULONG message,
 {
 	auto SetResult = [&](HRESULT rhr)->void
 	{
-		*(const_cast<HRESULT*>(hr)) = rhr;
+		if(hr) *(const_cast<HRESULT*>(hr)) = rhr;
 	};
 	HWND hWnd = reinterpret_cast<HWND>(ulhWnd);
 	//Check is right window

@@ -105,7 +105,7 @@ public:
 	// IBrowserNotify Methods
 	STDMETHOD(OnTitleChange)(BSTR title);
 	//window-less handle
-	STDMETHOD(OnRender)(const CHAR* buffer, LONG width, LONG height);
+	STDMETHOD(OnRender)(const BYTE* buffer, LONG width, LONG height, RECT* rects, ULONG rects_count);
 	STDMETHOD(OnAddressChange)(BSTR url);
 	STDMETHOD(OnStatusMessage)(BSTR msg);
 	STDMETHOD(OnClose)();

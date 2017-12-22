@@ -14,6 +14,13 @@ typedef enum
 	AsPopup = 2
 }BrowserRenderMode;
 
+typedef struct tag_wbRenderData {
+	RECT rc;
+	ULONG  ulData;
+	BYTE* pData;
+} WBRENDERDATA;
+
+
 interface IBrowser;
 
 [
@@ -91,7 +98,7 @@ interface IBrowserNotify : IDispatch
 	[propput, id(4), local] HRESULT BrowserWnd([in] ULONG_PTR hWnd);
 
 	[id(21), helpstring("Web title change")] HRESULT OnTitleChange([in] BSTR title);
-	[id(22), helpstring("Render buffer")] HRESULT OnRender([in] const CHAR* buffer, [in] LONG width, [in] LONG height);
+	[id(22), helpstring("Render buffer")] HRESULT OnRender([in] const BYTE* buffer, [in] LONG width, [in] LONG height, [in] RECT* rects, [in] ULONG rects_count);
 	[id(23), helpstring("Web Address change")] HRESULT OnAddressChange([in] BSTR url);
 	[id(24), helpstring("Web Status Message")] HRESULT OnStatusMessage([in] BSTR msg);
 	[id(25), helpstring("Web Close")] HRESULT OnClose();
@@ -137,7 +144,7 @@ library WebBrowserInstanceLib
 		properties:
 		methods:
 			[id(1)] HRESULT RenderStream([in] IUnknown** pStream,[in] LONG width,[in] LONG height);
-			[id(2)] HRESULT RenderArray([in] VARIANT arrBuffer,[in] LONG width,[in] LONG height);
+			[id(2), helpstring("arrBuffer is array of struct tag_wbRenderData")] HRESULT RenderArray([in] VARIANT arrBuffer, [in] ULONG arrCount, [in] LONG width, [in] LONG height);
 			[id(3)] HRESULT TitleChange([in] BSTR title);
 			[id(4)] HRESULT AddressChange([in] BSTR url);
 			[id(5)] HRESULT StatusMessage([in] BSTR msg);

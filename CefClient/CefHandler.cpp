@@ -15,12 +15,18 @@
 
 namespace {
 
-#define NOTIFY_START(p) assert(p);if(p){\
-	CComPtr<IBrowserNotify> spNotify;\
-	p->QueryInterface(IID_IBrowserNotify, (void**)&spNotify);\
-	if (spNotify)
-	
-#define NOTIFY_END }
+	BOOL  GetBrowserNotify(CComPtr<IBrowser>& pBrowser, CComPtr<IBrowserNotify>& spNotify)
+	{
+		if(pBrowser)
+		{
+			if(SUCCEEDED(pBrowser->QueryInterface(IID_IBrowserNotify, (void**)&spNotify)))
+			{
+				assert(spNotify);
+				return TRUE;
+			}
+		}
+		return FALSE;
+	}
 
 	CefHandler* g_instance = NULL;
 
@@ -71,7 +77,8 @@ void CefHandler::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& t
 	}
 	else {
 		// Set the title of the window using platform APIs.
-		NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
+		CComPtr<IBrowserNotify> spNotify;
+		if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
 		{
 			BrowserRenderMode rmode = WindowLess;
 			ibrowser_map_[browser->GetIdentifier()]->get_RenderMode(&rmode);
@@ -82,18 +89,17 @@ void CefHandler::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& t
 			CComBSTR str = title.c_str();
 			spNotify->OnTitleChange(str);
 		}
-		NOTIFY_END
 	}
 }
 
 void CefHandler::OnAddressChange(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
-	NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
+	CComPtr<IBrowserNotify> spNotify;
+	if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
 	{
 		CComBSTR str = url.c_str();
 		spNotify->OnAddressChange(str);
 	}
-	NOTIFY_END
 }
 
 bool CefHandler::OnTooltip(CefRefPtr<CefBrowser> browser, CefString& text)
@@ -103,12 +109,12 @@ bool CefHandler::OnTooltip(CefRefPtr<CefBrowser> browser, CefString& text)
 
 void CefHandler::OnStatusMessage(CefRefPtr<CefBrowser> browser, const CefString& value)
 {
-	NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
+	CComPtr<IBrowserNotify> spNotify;
+	if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
 	{
 		CComBSTR str = value.c_str();
 		spNotify->OnStatusMessage(str);
 	}
-	NOTIFY_END
 }
 
 /**
@@ -147,13 +153,13 @@ void CefHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 	base::AutoLock scopLock(m_lock_);
 	ibrowser_map_[browser->GetIdentifier()].Attach(ibrowser_map_[IBROWSERCREATE].Detach());
 
-	NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
+	CComPtr<IBrowserNotify> spNotify;
+	if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
 	{
 		spNotify->put_Identifier(browser->GetIdentifier());
 		spNotify->put_BrowserRefPoint(reinterpret_cast<IUnknown**>(&p));
 		spNotify->put_BrowserWnd(reinterpret_cast<ULONG_PTR>(browser->GetHost()->GetWindowHandle()));
 	}
-	NOTIFY_END
 }
 
 bool CefHandler::DoClose(CefRefPtr<CefBrowser> browser)
@@ -184,12 +190,12 @@ void CefHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 			IBrowserMapIt ibit = ibrowser_map_.find(browser->GetIdentifier());
 			if (ibit != ibrowser_map_.end())
 			{
-				NOTIFY_START(ibit->second)
+				CComPtr<IBrowserNotify> spNotify;
+				if(GetBrowserNotify(ibit->second, spNotify))
 				{
 					spNotify->RemoveBrowserRef();
 					spNotify->OnClose();
 				}
-				NOTIFY_END
 				ibrowser_map_.erase(ibit);
 			}
 			browser_list_.erase(bit);
@@ -207,21 +213,21 @@ void CefHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 */
 void CefHandler::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, TransitionType transition_type)
 {
-	NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
+	CComPtr<IBrowserNotify> spNotify;
+	if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
 	{
 		spNotify->OnLoadStart(transition_type);
 	}
-	NOTIFY_END
 }
 
 void CefHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
 {
 	//CefRefPtr<CefV8Context> v8 = frame->GetV8Context();
-	NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
+	CComPtr<IBrowserNotify> spNotify;
+	if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
 	{
 		spNotify->OnLoadEnd(httpStatusCode);
 	}
-	NOTIFY_END
 }
 
 void CefHandler::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, \
@@ -234,7 +240,8 @@ void CefHandler::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> 
 	// Display a load error message.
 	tstringstream ss;
 
-	NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
+	CComPtr<IBrowserNotify> spNotify;
+	if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
 	{
 		CComBSTR str_errorText = errorText.c_str();
 		CComBSTR str_failedUrl = failedUrl.c_str();
@@ -253,7 +260,6 @@ void CefHandler::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> 
 		}
 		frame->LoadString(ss.str(), failedUrl);
 	}
-	NOTIFY_END
 }
 
 /**
@@ -341,18 +347,18 @@ bool CefHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 
 bool CefHandler::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
 	CefRect& rect) {
-	return false;
+		return false;
 }
 
 bool CefHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) {
-	NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
+	CComPtr<IBrowserNotify> spNotify;
+	if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
 	{
 		RECT rectClid = { 0 };
 		::OutputDebugString(L"CefHandler::GetViewRect\n");
 		spNotify->GetViewRect(&rectClid);
 		rect.Set(rectClid.left, rectClid.top, rectClid.right, rectClid.bottom);
 	}
-	NOTIFY_END
 	return true;
 }
 
@@ -361,17 +367,17 @@ bool CefHandler::GetScreenPoint(CefRefPtr<CefBrowser> browser,
 	int viewY,
 	int& screenX,
 	int& screenY) {
-	NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
-	{
-		spNotify->GetScreenPoint(viewX, viewY,&screenX,&screenY);
-	}
-	NOTIFY_END
-	return false;
+		CComPtr<IBrowserNotify> spNotify;
+		if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
+		{
+			spNotify->GetScreenPoint(viewX, viewY,&screenX,&screenY);
+		}
+		return false;
 }
 
 bool CefHandler::GetScreenInfo(CefRefPtr<CefBrowser> browser,
 	CefScreenInfo& screen_info) {
-	return false;
+		return false;
 }
 
 void CefHandler::OnPopupShow(CefRefPtr<CefBrowser> browser,
@@ -385,11 +391,26 @@ void CefHandler::OnPaint(CefRefPtr<CefBrowser> browser,
 	const RectList& dirtyRects,
 	const void* buffer,
 	int width, int height) {
-	NOTIFY_START(ibrowser_map_[browser->GetIdentifier()])
-	{
-		spNotify->OnRender((const CHAR*)buffer, width, height);
-	}
-	NOTIFY_END
+
+		if(!dirtyRects.size()) return;
+		std::vector<RECT> rects;
+		RECT rc = {0};
+		//ATLTRACE("CefHandler::OnPaint dirtyRects %d width %d height %d\n",dirtyRects.size(), width, height);
+		for(auto it = dirtyRects.begin();dirtyRects.end() != it; ++it)
+		{
+			rc.left = it->x;
+			rc.top = it->y;
+			rc.right = rc.left + it->width;
+			rc.bottom = rc.top + it->height;
+			rects.push_back(rc);
+			//ATLTRACE("CefHandler::OnPaint dirtyRects [%d %d %d %d]\n",it->x,it->y,it->width,it->height);
+		}
+		
+		CComPtr<IBrowserNotify> spNotify;
+		if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
+		{
+			spNotify->OnRender((const BYTE*)buffer, width, height, &rects[0], (ULONG)rects.size());
+		}
 }
 
 void CefHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
@@ -403,7 +424,7 @@ bool CefHandler::StartDragging(CefRefPtr<CefBrowser> browser,
 	CefRefPtr<CefDragData> drag_data,
 	DragOperationsMask allowed_ops,
 	int x, int y) {
-	return false;
+		return false;
 }
 
 
@@ -469,8 +490,8 @@ HRESULT CefHandler::CreateBrowser(IBrowser * pBrowser, HWND hParentWnd, const RE
 		window_info.SetAsPopup(hParentWnd, "CefClient");
 		break;
 	}
-	
-	
+
+
 #endif //OS_WIN
 	// Create the browser window.
 	base::AutoLock scopLock(m_lock_);
