@@ -6,6 +6,7 @@
 #include "shared\geometry_util.h"
 #include "include/wrapper/cef_helpers.h"
 #include "include/wrapper/cef_closure_task.h"
+
 #include "BGRABlock.h"
 using namespace client;
 
@@ -99,9 +100,11 @@ STDMETHODIMP CBrowser::OnRender(const BYTE* buffer, LONG width, LONG height, REC
 
 	// buffer -> BGRA
 	CBGRABlock block(const_cast<BYTE*>(buffer), height, width, 4);
-
+	//rects->left = rects->top = 0;
+	//rects->right = width;
+	//rects->bottom = height;
 	HRESULT hr = S_OK;
-	ULONG cbLen = (ULONG)block.GetBlockLength();
+	ULONG cbLen = sizeof(WBRENDERDATA) + (rects->bottom - rects->top) * (rects->right - rects->left) * 4;
 	VARIANT arrBuffer;
 	VariantInit(&arrBuffer);
 	arrBuffer.vt = VT_ARRAY | VT_I1;
@@ -109,58 +112,20 @@ STDMETHODIMP CBrowser::OnRender(const BYTE* buffer, LONG width, LONG height, REC
 	SAFEARRAYBOUND saBounds = { cbLen + 1,0 };
 	pSArr = SafeArrayCreate(VT_I1, 1, &saBounds);
 	DWORD sss = ::GetLastError();
-	char* pdata = NULL;
-	SafeArrayAccessData(pSArr, (VOID**)&pdata);
-	//::memcpy(pdata,buffer,cbLen);
-	block.GetRectData(*rects, pdata);
-	pdata[cbLen] = '\0';
+	BYTE* pData = NULL;
+	SafeArrayAccessData(pSArr, (VOID**)&pData);
+	{
+		WBRENDERDATA* pwbData = (WBRENDERDATA*)pData;
+		pwbData->rc = *rects;
+		pwbData->pData = pData + sizeof(WBRENDERDATA);
+		pwbData->ulData = block.GetRectData(*rects, pwbData->pData);
+		pData[cbLen] = '\0';
+	}
 	SafeArrayUnaccessData(pSArr);
 	arrBuffer.parray = pSArr;
 	Fire_RenderArray(arrBuffer, rects_count, width, height);
 	SafeArrayDestroy(arrBuffer.parray);
 	return S_OK;
-
-	//a new hGlobal handle is to be allocated instead;
-	//automatically free the hGlobal parameter
-	IStream* pStream = NULL;
-	IStream* pDstStream = NULL;
-	hr = CreateStreamOnHGlobal(NULL, TRUE, &pStream); //pStream had 1 ref
-	ULONG ref = 0;
-	if (SUCCEEDED(hr))
-	{
-		ULONG cbLen = width * height * 4;
-		ULARGE_INTEGER size = { cbLen };
-		LARGE_INTEGER cur = { 0 };
-		ULONG cbWrite = 0;
-		CComPtr<IStream> spStream;
-		spStream.Attach(pStream);
-		hr = spStream->SetSize(size);
-		hr = spStream->Write(buffer, cbLen, &cbWrite);
-		hr = spStream->Seek(cur, STREAM_SEEK_SET, NULL);//reset to begain
-		hr = spStream->Commit(STGC_OVERWRITE);
-		STATSTG statData = { 0 };
-		hr = spStream->Stat(&statData, STATFLAG_NONAME);
-		ATLTRACE("%s -- %x\n", "pStream", pStream);
-		// Marshal  pStream to pDstStream
-		hr = CreateStreamOnHGlobal(NULL, TRUE, &pDstStream); //pDstStream had 1 ref
-		if (SUCCEEDED(hr))
-			ATLTRACE("%s -- %x\n", "pDstStream", pDstStream);
-		hr = ::CoMarshalInterface(pDstStream, IID_IStream, spStream, MSHCTX_LOCAL, NULL, MSHLFLAGS_TABLESTRONG);
-		if (SUCCEEDED(hr))
-		{
-			pDstStream->Seek(cur, STREAM_SEEK_SET, NULL);//reset to begain
-
-			if (FAILED(Fire_RenderStream((IUnknown**)&pDstStream, width, height)))
-			{
-				CComPtr<IStream> pFailedStream = NULL;
-				hr = ::CoGetInterfaceAndReleaseStream(pDstStream, IID_IStream, (void**)&pFailedStream);
-			}
-			ref = pStream->AddRef();
-			ref = pStream->Release();
-		}
-	}
-
-	return hr;
 }
 
 
@@ -470,23 +435,17 @@ STDMETHODIMP CBrowser::RemoveBrowserRef()
 }
 
 
-STDMETHODIMP CBrowser::ConvertStream(IStream* pStream, ULONG* pLen, CHAR** pVal)
+STDMETHODIMP CBrowser::ConvertArray(BYTE* pArry, ULONG uLenArry, WBRENDERDATA** ppData)
 {
-	HRESULT hr = S_OK;
-	CComPtr<IStream> spStream = pStream;
-	LARGE_INTEGER cur = { 0 };
-	STATSTG statData = { 0 };
-	hr = spStream->Seek(cur, STREAM_SEEK_SET, NULL);
-	hr = spStream->Stat(&statData, STATFLAG_NONAME);//exclude name - reduces time and resources used in an allocation and free operation.
-	if (SUCCEEDED(hr))
+	HRESULT hr = E_FAIL;
+	if (pArry && ppData && (*ppData == NULL))
 	{
-		assert(*pVal == NULL);
-		*pVal = new CHAR[statData.cbSize.QuadPart + 1];
-		if (*pVal == NULL) return E_OUTOFMEMORY;
-		ULONG cbLen = (ULONG)statData.cbSize.QuadPart;
-		hr = spStream->Read(*pVal, cbLen, pLen);
+		if(::IsBadReadPtr(pArry, uLenArry)) return hr;
+		WBRENDERDATA*& pData = (*ppData);
+		pData = (WBRENDERDATA*)pArry;
+		pData->pData = pArry + sizeof(WBRENDERDATA);
+		return S_OK;
 	}
-
 	return hr;
 }
 

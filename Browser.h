@@ -146,7 +146,7 @@ public:
 
 	STDMETHOD(MessageProc)(ULONG_PTR ulhWnd, ULONG message, ULONGLONG wParam, LONGLONG lParam);
 
-	STDMETHOD(ConvertStream)(IStream* pStream, ULONG* pLen, CHAR** pVal);
+	STDMETHOD(ConvertArray)(BYTE* pArry, ULONG uLenArry, WBRENDERDATA** ppData);
 	STDMETHOD(get_EnableMouse)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_EnableMouse)(VARIANT_BOOL newVal);
 	STDMETHOD(get_EnableKeybroad)(VARIANT_BOOL* pVal);

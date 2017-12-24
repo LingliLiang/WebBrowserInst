@@ -9,7 +9,7 @@ public:
 	{
 		LPBYTE p;
 		size_t szUnit;
-	};
+	} SINGLESTRIP;
 
 	void FilpMemory(void* pSrc, size_t len, size_t step)
 	{
@@ -69,7 +69,7 @@ public:
 	{
 		if(!pByte) return FALSE;
 		LPBYTE pDst = (LPBYTE)pByte;
-		if(::memcmp(&m_Rect, &rcRect, sizeof(RECT) == 0))
+		if(::memcmp(&m_Rect, &rcRect, sizeof(RECT)) == 0)
 		{
 			::memcpy_s(pDst, m_nAllBytes, m_pHead, m_nAllBytes);
 			return (ULONG)m_nAllBytes;

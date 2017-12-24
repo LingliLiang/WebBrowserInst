@@ -82,7 +82,10 @@ interface IBrowser : IDispatch {
 	[id(0x0046), helpstring("close browser")] HRESULT Close();
 
 	[id(0x0047), helpstring("handle off screen message proc")] HRESULT MessageProc([in] ULONG_PTR ulhWnd, [in] ULONG message, [in] ULONGLONG wParam, [in] LONGLONG lParam);
-	[id(0x0048), helpstring("Convert IStream to char's buffer")] HRESULT ConvertStream([in] IStream* pStream, [out] ULONG* pLen,[out] CHAR** pVal);
+	[id(0x0048), helpstring("Convert [RenderArray Event] VARIANT's data to WBRENDERDATA \
+		pArry get form [VARIANT SafeArrayAccessData]; *ppData must be NULL, and will be \
+		invaild after SafeArrayUnaccessData called; ")]
+		HRESULT ConvertArray([in] BYTE* pArry, [in] ULONG uLenArry, [in, out] WBRENDERDATA** ppData);
 
 };
 [
@@ -144,7 +147,7 @@ library WebBrowserInstanceLib
 		properties:
 		methods:
 			[id(1)] HRESULT RenderStream([in] IUnknown** pStream,[in] LONG width,[in] LONG height);
-			[id(2), helpstring("arrBuffer is array of struct tag_wbRenderData")] HRESULT RenderArray([in] VARIANT arrBuffer, [in] ULONG arrCount, [in] LONG width, [in] LONG height);
+			[id(2), helpstring("arrBuffer is array of struct tag_wbRenderData,in case always 1")] HRESULT RenderArray([in] VARIANT arrBuffer, [in] ULONG arrCount, [in] LONG width, [in] LONG height);
 			[id(3)] HRESULT TitleChange([in] BSTR title);
 			[id(4)] HRESULT AddressChange([in] BSTR url);
 			[id(5)] HRESULT StatusMessage([in] BSTR msg);

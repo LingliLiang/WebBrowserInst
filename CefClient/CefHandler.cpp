@@ -391,25 +391,14 @@ void CefHandler::OnPaint(CefRefPtr<CefBrowser> browser,
 	const RectList& dirtyRects,
 	const void* buffer,
 	int width, int height) {
-
-		if(!dirtyRects.size()) return;
-		std::vector<RECT> rects;
-		RECT rc = {0};
-		//ATLTRACE("CefHandler::OnPaint dirtyRects %d width %d height %d\n",dirtyRects.size(), width, height);
-		for(auto it = dirtyRects.begin();dirtyRects.end() != it; ++it)
-		{
-			rc.left = it->x;
-			rc.top = it->y;
-			rc.right = rc.left + it->width;
-			rc.bottom = rc.top + it->height;
-			rects.push_back(rc);
-			//ATLTRACE("CefHandler::OnPaint dirtyRects [%d %d %d %d]\n",it->x,it->y,it->width,it->height);
-		}
-		
+		//if(!dirtyRects.size()) return;
+		auto it = dirtyRects.begin();
+		RECT rc = {it->x,it->y,it->x + it->width,it->y + it->height};
+		//ATLTRACE("CefHandler::OnPaint dirtyRects [%d %d %d %d]\n",it->x,it->y,it->width,it->height);
 		CComPtr<IBrowserNotify> spNotify;
 		if(GetBrowserNotify(ibrowser_map_[browser->GetIdentifier()], spNotify))
 		{
-			spNotify->OnRender((const BYTE*)buffer, width, height, &rects[0], (ULONG)rects.size());
+			spNotify->OnRender((const BYTE*)buffer, width, height, &rc, 1);
 		}
 }
 
